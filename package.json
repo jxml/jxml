@@ -1,0 +1,25 @@
+{
+  "name": "jxml",
+  "version": "2.0.0",
+  "description": "JXML Web Components Framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jxml/jxml.git"
+  },
+  "keywords": [
+    "jxml",
+    "web",
+    "components",
+    "framework"
+  ],
+  "author": "Kwok Yang Bin <yangbin@zopim.com> (http://github.com/zopim/)",
+  "license": "Apache License, Version 2.0",
+  "bugs": {
+    "url": "https://github.com/jxml/jxml/issues"
+  },
+  "homepage": "https://github.com/jxml/jxml"
+}
