@@ -1,7 +1,5 @@
 export default (function() {
-	function $NAME() {
-		$CONSTRUCTOR
-	}
+	$CONSTRUCTOR
 
 	$NAME.prototype = Object.create($SUPERCLASS, $PROTOTYPE);
 

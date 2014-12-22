@@ -1,20 +1,9 @@
 import JXMLTemplate from 'jx/build/JXMLTemplate'
 
-/**
- * Given a JXML source, return a JS represenation of the component
- */
-export function translate(source) {
-	var parser = new window.DOMParser(); // TODO: don't access globals like this
-
-	var dom = parser.parseFromString(source, 'text/xml');
-
-	return 'export default ' + JSON.stringify(XMLToJSON(dom.firstChild));
-}
-
 export default JXML;
 
 function JXML(name) {
-	this.name = name;
+	this.name = name.replace(/[^a-zA-Z_$]/g, '_');
 
 	// Default pipeline
 	this.pipeline = [];
@@ -41,9 +30,12 @@ JXML.prototype.build = function() {
 JXML.prototype.parseXML = function(build_assets) {
 	var parser = new window.DOMParser(); // TODO: don't access globals like this
 
-	var dom = parser.parseFromString(build_assets.source, 'text/xml');
+	var dom = parser.parseFromString(build_assets.source, 'text/xml'), error
 
-	build_assets.template = XMLToJSON(dom.firstChild);
+	if ( (error = dom.getElementsByTagName('parsererror')).length )
+		throw error[0];
+
+	build_assets.template = XMLToJSON(dom.documentElement);
 }
 
 /**
@@ -53,7 +45,7 @@ JXML.prototype.extractDocs = function(build_assets) {
 	var template = build_assets.template, docs = [];
 
 	template[2] = template[2].filter(function(child_node) {
-		if (child_node[0] == 'Doc') {
+		if (/(^|\/)Doc$/.test(child_node[0])) {
 			docs.push(child_node);
 
 			return false;
@@ -71,23 +63,33 @@ JXML.prototype.extractDocs = function(build_assets) {
 JXML.prototype.extractScript = function(build_assets) {
 	var template = build_assets.template, script = '';
 
-	template[2] = template[2].filter(function(child_node) {
-		if (child_node[0] == 'script') {
-			script += child_node[2];
+	template[2] = template[2].filter(extractScript);
+
+	if (!extractScript(template))
+		build_assets.template = null;
+
+	build_assets.script = script;
+
+	function extractScript(child_node) {
+		if (/(^|\/)script$/.test(child_node[0])) {
+			var s = child_node[2];
+
+			if (Array.isArray(s))
+				s = s.join('');
+
+			script += s;
 
 			return false;
 		}
 
 		return true;
-	});
-
-	build_assets.script = script;
+	}
 }
 
 JXML.prototype.generateJS = function(build_assets) {
 	var jsString = makeClass(
-		'anonymous',
-		function() { throw "Use JXML.create" },
+		this.name,
+		function(jxmlcomponent) { this.jxmlcomponent = jxmlcomponent },
 		null,
 		{
 			template: build_assets.template,
@@ -119,7 +121,7 @@ JXML.prototype.generateJS = function(build_assets) {
  * ] ]
  */
 function XMLToJSON(element) {
-	var name = element.namespaceURI? element.namespaceURI + '/' : '' + element.tagName,
+	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.tagName,
 		children = [],
 		childNodes = element.childNodes;
 
@@ -142,6 +144,11 @@ function XMLToJSON(element) {
 
 				continue;
 
+			case 4: // CData
+				children.push(c.textContent) // treat as text
+
+				continue;
+
 			default:
 				console.log('unknown node', c);
 		}
@@ -158,7 +165,7 @@ function XMLToJSON(element) {
 		attributes[attr.nodeName] = value;
 	}
 
-	return [ element.tagName, attributes, children ];
+	return [ name, attributes, children ];
 }
 
 /**
@@ -168,8 +175,8 @@ function XMLToJSON(element) {
  * Returns JavaScript as a string
  */
 function makeClass(name, constructor, superclass, prototype) {
-	constructor = constructor.toString().replace(/^function[^{]*{|}$/g, '');
-	prototype = toSource(prototype);
+	constructor = constructor.toString().replace(/^function/, 'function ' + name);
+	prototype = toObjectPrototypeProperties(prototype);
 
 	function raw(str) { return function() { return str } }
 
@@ -181,19 +188,24 @@ function makeClass(name, constructor, superclass, prototype) {
 }
 
 /**
- * Converts an object to a JavaScript string that would
- * recreate this object if eval'd
+ * Converts an prototype to a JavaScript string that would
+ * recreate the prototype if passed to Object.create
+ *
+ * > toObjectPrototypeProperties({ moo: function() { return 42 }, cow: 42 })
+ * "{\"moo\": { value: function() { return 42 } },\n\"cow\": { value: 42 }}"
  */
-function toSource(object) {
+function toObjectPrototypeProperties(object) {
 	var string = [];
 
 	for (var k in object) {
-		var item = '"' + k + '": ';
+		var item = '"' + k + '": { value: ';
 
 		if (typeof object[k] == 'function')
 			item += object[k].toString();
 		else
 			item += JSON.stringify(object[k]);
+
+		item += ' }';
 
 		string.push(item);
 	}
