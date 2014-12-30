@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<!-- This is a loader for JXML Applications / Modules -->
+	<head>
+	<head>
+		<script src="lib/system.js"></script>
+	</head>
+	<body>
+		<script>
+			System.config({ baseURL: 'lib' });
+
+			Promise.all([
+				System.import('jx/JXML'),
+				System.import('jx/ui/html/HTMLRenderer')
+			]).then(function(modules) {
+				var name = location.search.substr(1) || 'jx/example/KitchenSink',
+					JXML = modules[0].default,
+					HTMLRenderer = modules[1].default,
+					app = JXML.create(name),
+					renderer = new HTMLRenderer(app);
+
+				app.show();
+
+				// TODO: rendering should be automatic and continuous
+				setTimeout(function() {
+					renderer.render();
+				}, 1000);
+			});
+		</script>
+	</body>
+</html>

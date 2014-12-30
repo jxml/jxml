@@ -1,0 +1,47 @@
+export default function HTMLRenderer(app, dom) {
+	this.app = app;
+	dom = dom || document.body;
+	this.root_dom = dom;
+}
+
+HTMLRenderer.prototype.render = function() {
+	var diff = this.app.render();
+
+	// TODO: this is not really the diff nor are we doing any patching
+	this.root_dom.innerHTML = '';
+
+	if (diff) {
+		var el = this.createElement(diff);
+
+		this.root_dom.appendChild(el);
+	}
+}
+
+
+HTMLRenderer.prototype.createElement = function(attr) {
+	var el = document.createElement(attr.tag || 'div');
+
+	el.style.position = 'absolute';
+
+	if (attr.text)
+		el.textContent = attr.text;
+
+	var children = attr.children;
+
+	if (children) {
+		for (var i = 0; i < children.length; i++) {
+			var child_attr = children[i];
+
+			if (!child_attr) continue;
+
+			var child_el = this.createElement(child_attr);
+
+			if (attr.uid)
+				child_el.setAttribute('id', 'jx:' + attr.uid);
+
+			el.appendChild(child_el);
+		}
+	}
+
+	return el;
+}

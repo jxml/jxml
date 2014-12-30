@@ -1,14 +1,17 @@
 export default function JXML() {}
 
+var implementation_map = {};
 var ComponentsMap = {};
 
 var components = {}, // God object
-	next_uid = 0;
+	next_uid = 1;
 
 /**
  * Always use JXML.create to instantiate JXML components.
  */
 JXML.create = function(module, owner, attr) {
+	// TODO: allow module overwrites by different renderers
+
 	var element = new JXMLComponent(module, owner, attr);
 
 	element.uid = next_uid;
@@ -18,6 +21,7 @@ JXML.create = function(module, owner, attr) {
 }
 
 JXML.import = function(name, cb) {
+	if (!name) throw 'Module name required';
 	System.import(name + '.jxml!').then(cb);
 }
 
@@ -47,8 +51,9 @@ JXMLComponent.prototype.resolve = function() {
 			self.root = root;
 			self.resolved.init && self.resolved.init();
 
-			//self.children[0].setAttr(self.attr);
-			//self.children[0].setAttr({ visible: true });
+			// TODO: children are not merged
+			root.setAttr(self.attr);
+
 			if (self.visible)
 				self.show();
 		}
@@ -68,6 +73,16 @@ JXMLComponent.prototype.show = function() {
 		this.root.show();
 }
 
+JXMLComponent.prototype.render = function() {
+	if (!this.resolved)
+		return;
+
+	if (this.resolved.template)
+		return this.root && this.root.render();
+	else
+		return this.resolved.render && this.resolved.render();
+}
+
 JXMLComponent.prototype.create = function(module, attr) {
 	attr = attr || {};
 
@@ -79,6 +94,7 @@ JXMLComponent.prototype.create = function(module, attr) {
 		this.IDs[id] = element;
 	}
 
+	// TODO: allow module overwrites
 	var element = JXML.create(module, this, attr);
 
 	return element;

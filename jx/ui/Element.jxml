@@ -1,0 +1,37 @@
+<script>
+	<![CDATA[
+		function render() {
+			var rendered = {
+				text: attr.text,
+				uid:  this.jxmlcomponent.uid,
+				children: []
+			};
+
+			var children = attr.externalChildren;
+
+			for (var i = 0; i < children.length; i++) {
+				var rendered_child = children[i].render();
+
+				if (rendered_child)
+					rendered.children.push(rendered_child);
+				else
+					console.log('bad child?', children[i]);
+			}
+
+			return rendered;
+		}
+
+		this.render = render;
+
+		// TODO: find a way to deal with children it should not be having
+
+		// TODO: figure out what to do with external children
+		var externalChildren = attr.externalChildren;
+
+		if (externalChildren)
+			for (var i = 0; i < externalChildren.length; i++)
+				externalChildren[i].show();
+
+		// At this point, nested drawing bits are all in externalChildren
+	]]>
+</script>
