@@ -133,12 +133,23 @@ JXMLComponent.prototype.setAttr = function(attr) {
 	deepMerge(this.attr, attr);
 }
 
+/**
+ * Merges map `src` into `dst`. Will not retain references
+ * to any value in `src`.
+ *
+ * > a = {}, b = { moo: { cow: 42 } }, deepMerge(a, b), a.moo == b.moo
+ * false
+ */
 function deepMerge(dst, src) {
 	for (var k in src) {
 		var v = src[k];
 
-		if (v && typeof v == 'object' && k in dst)
-			deepMerge(dst[k], v);
+		if (v && typeof v == 'object') {
+			if (typeof dst[k] == 'object')
+				deepMerge(dst[k], v);
+			else
+				deepMerge(dst[k] = {}, v);
+		}
 		else
 			dst[k] = v;
 	}
