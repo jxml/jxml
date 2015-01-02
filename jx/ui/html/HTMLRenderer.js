@@ -29,8 +29,8 @@ HTMLRenderer.prototype.createElement = function(attr) {
 	var children = attr.children;
 
 	if (children) {
-		for (var i = 0; i < children.length; i++) {
-			var child_attr = children[i];
+		for (var k in children) {
+			var child_attr = children[k];
 
 			if (!child_attr) continue;
 

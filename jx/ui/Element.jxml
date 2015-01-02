@@ -4,18 +4,18 @@
 			var rendered = {
 				text: attr.text,
 				uid:  this.jxmlcomponent.uid,
-				children: []
+				children: {}
 			};
 
 			var children = attr.externalChildren;
 
-			for (var i = 0; i < children.length; i++) {
-				var rendered_child = children[i].render();
+			for (var k in children) {
+				var rendered_child = children[k].render();
 
 				if (rendered_child)
-					rendered.children.push(rendered_child);
+					rendered.children[k] = rendered_child;
 				else
-					console.log('bad child?', children[i]);
+					console.log('bad child?', children[k]);
 			}
 
 			return rendered;
@@ -29,8 +29,8 @@
 		var externalChildren = attr.externalChildren;
 
 		if (externalChildren)
-			for (var i = 0; i < externalChildren.length; i++)
-				externalChildren[i].show();
+			for (var k in externalChildren)
+				externalChildren[k].show();
 
 		// At this point, nested drawing bits are all in externalChildren
 	]]>

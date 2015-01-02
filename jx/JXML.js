@@ -46,13 +46,20 @@ JXMLComponent.prototype.resolve = function() {
 
 		if (self.resolved.template) {
 			// this is a JXMLComponent
-			var root = self.cloneTemplate(self.resolved.template);
+			var root = self.root = self.cloneTemplate(self.resolved.template);
 
-			self.root = root;
-			self.resolved.init && self.resolved.init();
+			var extChildren = self.attr && self.attr.externalChildren;
 
-			// TODO: children are not merged
+			if (extChildren) {
+				for (var k in extChildren) {
+					extChildren['Z' + k] = extChildren[k];
+					delete extChildren[k];
+				}
+}
+
 			root.setAttr(self.attr);
+
+			self.resolved.init && self.resolved.init();
 
 			if (self.visible)
 				self.show();
@@ -105,9 +112,9 @@ JXMLComponent.prototype.cloneTemplate = function(template) {
 		attr     = template[1],
 		children = template[2];
 
-	var element = this.create(tag, attr), child_elements = [];
+	var element = this.create(tag, attr), child_elements = {};
 
-	var text;
+	var text, children_index = 1;
 
 	for (var i = 0; i < children.length; i++) {
 		var child = children[i], child_element;
@@ -116,7 +123,9 @@ JXMLComponent.prototype.cloneTemplate = function(template) {
 			text = (text || '') + child;
 		else {
 			child_element = this.cloneTemplate(child, element);
-			child_elements.push(child_element);
+
+			var key = toKey(children_index++);
+			child_elements[key] = child_element;
 		}
 	}
 
@@ -157,4 +166,18 @@ function deepMerge(dst, src) {
 
 function template() {
 	var $ID = JXML.create($NAME, function(c) { $ID = c });
+}
+
+/**
+ * A dubious function that takes a number and
+ * returns a lexicographically sortable representation.
+ * TODO: only supports 3844 keys :(
+ *
+ * > toKey(42)
+ * "0G"
+ */
+var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), KEYS_LENGTH = KEYS.length;
+
+function toKey(n) {
+	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
 }
