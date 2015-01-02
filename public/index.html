@@ -9,15 +9,24 @@
 		<script>
 			System.config({ baseURL: 'lib' });
 
+			var params = {
+				app: 'jx/example/KitchenSink',
+				renderer: 'jx/ui/html/HTMLRenderer'
+			};
+
+			location.search.replace(/\??(([^=]*)=)?([^&]+)&?/g, function(_, _, k, v) {
+				params[k || 'app'] = v;
+			});
+
 			Promise.all([
 				System.import('jx/JXML'),
-				System.import('jx/ui/html/HTMLRenderer')
+				System.import(params.renderer)
 			]).then(function(modules) {
-				var name = location.search.substr(1) || 'jx/example/KitchenSink',
+				var name = params.app,
 					JXML = modules[0].default,
-					HTMLRenderer = modules[1].default,
+					Renderer = modules[1].default,
 					app = JXML.create(name),
-					renderer = new HTMLRenderer(app);
+					renderer = new Renderer(app);
 
 				app.show();
 
