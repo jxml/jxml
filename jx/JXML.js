@@ -28,8 +28,8 @@ JXML.import = function(name, cb) {
 function JXMLComponent(module, owner, attr) {
 	this.module    = module;
 	this.owner_uid = owner && owner.uid;
-	this.attr      = attr;
 	this.resolved  = false;
+	deepMerge(this.attr = {}, attr);
 }
 
 JXMLComponent.prototype.resolve = function() {
