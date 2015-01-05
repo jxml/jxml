@@ -139,10 +139,6 @@ function deepMerge(dst, src) {
 	}
 }
 
-function template() {
-	var $ID = JXML.create($NAME, function(c) { $ID = c });
-}
-
 /**
  * A dubious function that takes a number and
  * returns a lexicographically sortable representation.
