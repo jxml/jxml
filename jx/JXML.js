@@ -93,6 +93,9 @@ JXMLComponent.prototype.render = function() {
 JXMLComponent.prototype.create = function(module, attr) {
 	attr = attr || {};
 
+	// TODO: allow module overwrites
+	var element = JXML.create(module, this, attr);
+
 	var id = attr.id;
 
 	if (id) {
@@ -100,9 +103,6 @@ JXMLComponent.prototype.create = function(module, attr) {
 
 		this.IDs[id] = element;
 	}
-
-	// TODO: allow module overwrites
-	var element = JXML.create(module, this, attr);
 
 	return element;
 }
