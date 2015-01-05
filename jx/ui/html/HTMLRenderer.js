@@ -21,6 +21,9 @@ HTMLRenderer.prototype.render = function() {
 HTMLRenderer.prototype.createElement = function(attr) {
 	var el = document.createElement(attr.tag || 'div');
 
+	if (attr.uid)
+		el.id = attr.uid;
+
 	el.style.position = 'absolute';
 
 	if (attr.text)
@@ -35,9 +38,6 @@ HTMLRenderer.prototype.createElement = function(attr) {
 			if (!child_attr) continue;
 
 			var child_el = this.createElement(child_attr);
-
-			if (attr.uid)
-				child_el.setAttribute('id', 'jx:' + attr.uid);
 
 			el.appendChild(child_el);
 		}
