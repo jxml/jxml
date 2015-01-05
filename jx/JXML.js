@@ -1,3 +1,7 @@
+/**
+ * JXML scaffolding
+ */
+
 export default function JXML() {}
 
 var implementation_map = {};
@@ -20,11 +24,27 @@ JXML.create = function(module, owner, attr) {
 	return element;
 }
 
+/**
+ * Loads a component and runs callback when loaded.
+ * Internally uses system.js loader.
+ * Used only by .resolve()
+ * @private
+ */
 JXML.import = function(name, cb) {
 	if (!name) throw 'Module name required';
 	System.import(name + '.jxml!').then(cb);
 }
 
+/**
+ * Creates a JXMLComponent.
+ *
+ * Called by JXML.create(). Do not use directly.
+ *
+ * Effect:
+ * assigns a module name and owner, deep merges attribute
+ *
+ * @constructor
+ */
 function JXMLComponent(module, owner, attr) {
 	this.module    = module;
 	this.owner_uid = owner && owner.uid;
@@ -32,6 +52,15 @@ function JXMLComponent(module, owner, attr) {
 	deepMerge(this.attr = {}, attr);
 }
 
+/**
+ * Resolves a JXMLComponent.
+ *
+ * Effect:
+ * takes effect if component has not been resolved.
+ * inits (and show) after module load by .import()
+ *
+ * @private
+ */
 JXMLComponent.prototype.resolve = function() {
 	if (this.resolved) return;
 
@@ -55,7 +84,7 @@ JXMLComponent.prototype.resolve = function() {
 					extChildren['Z' + k] = extChildren[k];
 					delete extChildren[k];
 				}
-}
+			}
 
 			root.setAttr(self.attr);
 
@@ -71,6 +100,12 @@ JXMLComponent.prototype.resolve = function() {
 	});
 }
 
+/**
+ * Attempts to show component.
+ *
+ * Effect:
+ * shows component and resolves if necessary.
+ */
 JXMLComponent.prototype.show = function() {
 	this.visible = true;
 
@@ -80,6 +115,10 @@ JXMLComponent.prototype.show = function() {
 		this.root.show();
 }
 
+/**
+ * Returns objects for rendering.
+ * @private
+ */
 JXMLComponent.prototype.render = function() {
 	if (!this.resolved)
 		return;
@@ -90,6 +129,13 @@ JXMLComponent.prototype.render = function() {
 		return this.resolved.render && this.resolved.render();
 }
 
+/**
+ * Creates this component
+ * Used by cloneTemplate()
+ * Effect:
+ * calls JXML.create(), assigns this.IDs, return component
+ * @private
+ */
 JXMLComponent.prototype.create = function(module, attr) {
 	attr = attr || {};
 
@@ -107,6 +153,12 @@ JXMLComponent.prototype.create = function(module, attr) {
 	return element;
 }
 
+/**
+ * Creates instance of component from template
+ * Used by .resolve()
+ * Effect: recursively create children + unknown
+ * @private
+ */
 JXMLComponent.prototype.cloneTemplate = function(template) {
 	var tag    = template[0],
 		attr     = template[1],
@@ -137,6 +189,12 @@ JXMLComponent.prototype.cloneTemplate = function(template) {
 	return element;
 }
 
+/**
+ * Set attributes of componen by merging.
+ * Effect:
+ * Deep merges / copies target properties into self
+ * @private
+ */
 JXMLComponent.prototype.setAttr = function(attr) {
 	this.attr = this.attr || {}
 	deepMerge(this.attr, attr);
@@ -164,6 +222,9 @@ function deepMerge(dst, src) {
 	}
 }
 
+/**
+ * Unknown template function. TODO: FIXME.
+ */
 function template() {
 	var $ID = JXML.create($NAME, function(c) { $ID = c });
 }
