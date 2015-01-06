@@ -22,7 +22,7 @@ HTMLRenderer.prototype.createElement = function(attr) {
 	var el = document.createElement(attr.tag || 'div');
 
 	if (attr.uid)
-		el.id = attr.uid;
+		el.id = 'jx:' + attr.uid;
 
 	el.style.position = 'absolute';
 
