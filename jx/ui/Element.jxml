@@ -4,7 +4,18 @@
 			var rendered = {
 				text: attr.text,
 				uid:  this.jxmlcomponent.uid,
-				children: {}
+				children: {},
+				attr: attr
+				/*
+				// or
+				styles: {
+					left: attr.left,
+					right: attr.right,
+					top: attr.top,
+					bottom: attr.bottom,
+					bounds: attr.bounds
+				}
+				*/
 			};
 
 			var children = attr.externalChildren;

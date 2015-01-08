@@ -29,6 +29,17 @@ HTMLRenderer.prototype.createElement = function(attr) {
 	if (attr.text)
 		el.textContent = attr.text;
 
+	console.log(attr);
+	var attr2 = attr.attr;
+	if (attr2.top)
+		el.style.top = attr2.top + 'px';
+
+	if (attr2.left)
+		el.style.left = attr2.left + 'px';
+	
+	if (attr2.width)
+		el.style.width = attr2.width + 'px';
+
 	var children = attr.children;
 
 	if (children) {
