@@ -1,21 +1,2 @@
-<script>
-	<![CDATA[
-		var attr = this.jxmlcomponent.attr;
-
-		// TODO: which document?
-		var div = document.createElement('div');
-
-		if ('text' in attr)
-			div.textContent = attr.text;
-
-		// TODO: REALLY?????
-		document.body.appendChild(div);
-
-		// TODO: find a way to deal with children it should not be having
-
-		var externalChildren = attr.externalChildren;
-
-		if (externalChildren && externalChildren.length)
-			throw 'Label is incapable of having children';
-	]]>
-</script>
+<Element xmlns="jx/ui">
+</Element>

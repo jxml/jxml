@@ -68,6 +68,9 @@ JXML.prototype.extractScript = function(build_assets) {
 	if (!extractScript(template))
 		build_assets.template = null;
 
+	// TODO: provide a proper scope for <script>s
+	script = 'var attr = this.jxmlcomponent.attr' + script;
+
 	build_assets.script = script;
 
 	function extractScript(child_node) {

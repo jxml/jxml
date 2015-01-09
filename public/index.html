@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<!-- This is a loader for JXML Applications / Modules -->
+	<head>
+		<script src="lib/system.js"></script>
+	</head>
+	<body>
+		<script>
+			System.config({ baseURL: 'lib' });
+
+			var params = {
+				app: 'jx/example/KitchenSink',
+				renderer: 'jx/ui/html/HTMLRenderer'
+			};
+
+			location.search.replace(/\??(([^=]*)=)?([^&]+)&?/g, function(_, _, k, v) {
+				params[k || 'app'] = v;
+			});
+
+			Promise.all([
+				System.import('jx/JXML'),
+				System.import(params.renderer)
+			]).then(function(modules) {
+				var name = params.app,
+					JXML = modules[0].default,
+					Renderer = modules[1].default,
+					app = JXML.create(name),
+					renderer = new Renderer(app);
+
+				app.show();
+
+				// TODO: rendering should be automatic and continuous
+				setTimeout(function() {
+					renderer.render();
+				}, 1000);
+			});
+		</script>
+	</body>
+</html>

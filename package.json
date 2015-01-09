@@ -24,5 +24,8 @@
   "homepage": "https://github.com/jxml/jxml",
   "devDependencies": {
     "mocha": "~2.0.1"
+  },
+  "dependencies": {
+    "systemjs": "^0.11.0"
   }
 }
