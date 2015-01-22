@@ -9,6 +9,7 @@ import JXML from 'jx/JXML';
  * dispatched asynchronously.
  */
 export default function JXMLComponent(renderer, module, uid, attr) {
+	uid = uid || 'root';
 	this.renderer   = renderer;
 	this.uid        = uid;
 	this.module     = module;
@@ -18,11 +19,11 @@ export default function JXMLComponent(renderer, module, uid, attr) {
 	// where to put dirty stuff? always notify? or keep
 	// locally until requested?
 	//deepMerge(this.attr = {}, attr);
-	console.log('CONSTRUCTOR', module, attr);
+//console.log('CONSTRUCTOR', module, attr);
+	this.unresolved_attr = {};
+
 	if (attr)
 		this.setAttr(attr);
-
-	this.unresolved_attr = {};
 }
 
 JXMLComponent.prototype.resolve = function() {
@@ -38,13 +39,13 @@ JXMLComponent.prototype.resolve = function() {
 
 		self.resolved = new component(self);
 
-		console.log('resolved', self.module);
+//console.log('resolved', self.module);
 
 		if (self.resolved.template) {
 			// this is a JXMLComponent
 			var attr = self.resolved.template;
-			console.log('my own attributes', attr);
-			console.log('my external attributes', self.unresolved_attr);
+//console.log('my own attributes', attr);
+//console.log('my external attributes', self.unresolved_attr);
 
 			/*console.log('about to create',
 				self.module,
@@ -68,8 +69,8 @@ JXMLComponent.prototype.resolve = function() {
 				self.show();
 		}
 		else {
-			console.log('resolve: I am a rendering component');
-			console.log('Someone should set my attributes shortly');
+//console.log('resolve: I am a rendering component');
+//console.log('Someone should set my attributes shortly');
 			// This is a rendering component
 			self.resolved.init && self.resolved.init();
 		}
@@ -103,7 +104,12 @@ JXMLComponent.prototype.render = function() {
 JXMLComponent.prototype.create = function(module, attr, child_key) {
 	attr = attr || {};
 
-	var uid = this.uid + '.' + (child_key || module);
+	var uid;
+
+	if (child_key)
+		uid = this.uid.replace(/:.*/, '') + ' ' + child_key;
+	else
+		uid = this.uid + ':' + module;
 
 	// TODO: allow module overwrites
 	var element = JXML.create(this.renderer, module, uid, attr);
@@ -163,7 +169,7 @@ JXMLComponent.prototype.cloneTemplate = function(template) {
  * Elements: transforms to renderlist
  */
 JXMLComponent.prototype.setAttr = function(delta) {
-	console.log('delta', this.module, JSON.stringify(delta, null, '\t'));
+	//console.log('delta', this.module, JSON.stringify(delta, null, '\t'));
 	delta = json(delta); // make a copy
 
 	// Transform external children
@@ -180,13 +186,17 @@ JXMLComponent.prototype.setAttr = function(delta) {
 	if (delta.visible)
 		this.resolve();
 
-	if (this.resolved) {
+	if ( ! this.resolved) {
+		// component unresolved, save for later
+		JXML.deepMerge(this.unresolved_attr, delta);
+	}
+	else {
 		// Pass attributes / render if component resolved
 		this.attr = this.attr || {}
 		JXML.deepMerge(this.attr, delta);
 
 		if (this.root) { // component has internal structure
-console.log('setAttr, with root');
+//console.log('setAttr, with root');
 			// Allow component to mangle attributes
 			if (this.resolved.onAttr)
 				this.resolved.onAttr(delta, this.attr);
@@ -195,8 +205,8 @@ console.log('setAttr, with root');
 			this.root.setAttr(delta);
 		}
 		else {
-			console.log('setAttr: I am a rendering element', this.module);
-			console.log('and my children are', delta.children);
+//console.log('setAttr: I am a rendering element', this.module);
+//console.log('and my children are', delta.children);
 			// Component is a rendering element
 			var delta_children = delta.children;
 
@@ -219,7 +229,7 @@ console.log('setAttr, with root');
 						// signal child for great destruction
 						this.children[k].destroy();
 						delete this.children[k];
-						dirty_children[k] = null;
+						dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = null;
 					}
 				}
 				else { // child is being added or modified
@@ -227,7 +237,7 @@ console.log('setAttr, with root');
 						children[k].setAttr(child);
 					else {// creation
 						children[k] = this.create(child.module, child, k);
-						dirty_children[k] = true;
+						dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = true;
 					}
 				}
 			}
@@ -240,11 +250,6 @@ console.log('setAttr, with root');
 			if (!isEmpty(dirty))
 				this.onDirty(dirty);
 		}
-	}
-	else {
-		// component unresolved, save for later
-		this.unresolved_attr = this.unresolved_attr || {};
-		JXML.deepMerge(this.unresolved_attr, delta);
 	}
 	// By default, pass attributes to root
 	/*
@@ -271,9 +276,10 @@ console.log('setAttr, with root');
 }
 
 JXMLComponent.prototype.onDirty = function(dirty) {
+	//console.log('onDirty', this.module, JSON.stringify(dirty, null, '\t'));
 	var dirtylist = {};
 
-	dirtylist[this.uid] = json(dirty);
+	dirtylist[this.uid.replace(/:.*/, '')] = json(dirty);
 	this.renderer.onDirty(dirtylist);
 }
 

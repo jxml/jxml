@@ -40,7 +40,6 @@ JXML.cast = function(uid_or_module, method, args) {
 		if (component) {
 			component[method].apply
 		}
-
 	}
 	else
 		throw 'TODO: implement me!';
