@@ -1,37 +1,23 @@
 <script>
 	<![CDATA[
-		function render() {
-			var rendered = {
-				text: attr.text,
-				uid:  this.jxmlcomponent.uid,
-				children: {}
-			};
+		function render(delta, attr) {
+			var dirty = {};
 
-			var children = attr.externalChildren;
+			if ('text' in delta)
+				dirty.text = delta.text;
 
-			for (var k in children) {
-				var rendered_child = children[k].render();
+			if ('background' in delta)
+				dirty.background = delta.background;
 
-				if (rendered_child)
-					rendered.children[k] = rendered_child;
-				else
-					console.log('bad child?', children[k]);
-			}
+			if ('x' in delta)
+				dirty.x = delta.x;
 
-			return rendered;
+			if ('y' in delta)
+				dirty.y = delta.y;
+
+			return dirty;
 		}
 
 		this.render = render;
-
-		// TODO: find a way to deal with children it should not be having
-
-		// TODO: figure out what to do with external children
-		var externalChildren = attr.externalChildren;
-
-		if (externalChildren)
-			for (var k in externalChildren)
-				externalChildren[k].show();
-
-		// At this point, nested drawing bits are all in externalChildren
 	]]>
 </script>

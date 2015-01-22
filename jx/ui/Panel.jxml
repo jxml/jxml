@@ -1,3 +1,14 @@
 <Element xmlns="jx/ui">
-	<Label background="gray">TODO: Insert title here</Label>
+	<script>
+		<![CDATA[
+			console.log('in panel');
+
+			function onAttr(delta, attr) {
+				console.log('onAttr');
+				console.log(JSON.stringify(delta, null, '\t'));
+				console.log(JSON.stringify(attr, null, '\t'));
+			}
+		]]>
+	</script>
+	<Label visible="true" background="gray">TODO: Insert title here</Label>
 </Element>

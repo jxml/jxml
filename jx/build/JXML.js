@@ -42,17 +42,18 @@ JXML.prototype.parseXML = function(build_assets) {
  * Removes <Doc> from the template and puts in meta
  */
 JXML.prototype.extractDocs = function(build_assets) {
-	var template = build_assets.template, docs = [];
+	var template = build_assets.template,
+		children = template.children,
+		docs = [];
 
-	template[2] = template[2].filter(function(child_node) {
-		if (/(^|\/)Doc$/.test(child_node[0])) {
+	for (var k in children) {
+		var child = children[k];
+
+		if (/(^|\/)Doc$/.test(child.module)) {
 			docs.push(child_node);
-
-			return false;
+			delete children[k];
 		}
-
-		return true;
-	});
+	}
 
 	build_assets.meta.docs = docs;
 }
@@ -61,31 +62,56 @@ JXML.prototype.extractDocs = function(build_assets) {
  * Removes <script> from the template and puts in init
  */
 JXML.prototype.extractScript = function(build_assets) {
-	var template = build_assets.template, script = '';
+	var template = build_assets.template,
+		children = template.children,
+		script = extractScript(template);
 
-	template[2] = template[2].filter(extractScript);
+	/*
+	console.log('extractScript',
+			'<<<',
+			this.name,
+			build_assets,
+			'>>>'
+			);
+			*/
 
-	if (!extractScript(template))
+	if (script)
+		// Rendering component, no document structure
 		build_assets.template = null;
+	else {
+		for (var k in children) {
+			var s = extractScript(children[k]);
 
+			if (s) {
+				script += s;
+				delete children[k];
+			}
+		}
+	}
+	
 	// TODO: provide a proper scope for <script>s
-	script = 'var attr = this.jxmlcomponent.attr' + script;
+	script = [
+		'var attr = this.jxmlcomponent.attr',
+		'if (typeof onAttr != "undefined")',
+		'  this.onAttr = onAttr',
+		'if (typeof render != "undefined")', 
+		'  this.render = render',
+		';',
+		script
+	].join('\n');
 
 	build_assets.script = script;
 
-	function extractScript(child_node) {
-		if (/(^|\/)script$/.test(child_node[0])) {
-			var s = child_node[2];
+	function extractScript(node) {
+		//console.log('extractScript', node);
+		var script = '';
 
-			if (Array.isArray(s))
-				s = s.join('');
+		if (/(^|\/)script$/.test(node.module))
+			return node.text;
+			//for (var k in node.children)
+				//script += node.children[k];
 
-			script += s;
-
-			return false;
-		}
-
-		return true;
+		return script;
 	}
 }
 
@@ -125,8 +151,10 @@ JXML.prototype.generateJS = function(build_assets) {
  */
 function XMLToJSON(element) {
 	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.tagName,
-		children = [],
-		childNodes = element.childNodes;
+		children = {},
+		childNodes = element.childNodes,
+		children_index = 1,
+		text = '';
 
 	for (var i = 0; i < childNodes.length; i++) {
 		var c = childNodes[i];
@@ -136,19 +164,17 @@ function XMLToJSON(element) {
 				continue;
 
 			case 3: // Text
-				var text = c.nodeValue.replace(/[ \t\n]+/g, ' '); // compress whitespace
-
-				children.push(text);
+				text += c.nodeValue.replace(/[ \t\n]+/g, ' '); // compress whitespace
 
 				continue;
 
 			case 1: // Element
-				children.push(XMLToJSON(c));
+				children[toKey(children_index++)] = XMLToJSON(c);
 
 				continue;
 
 			case 4: // CData
-				children.push(c.textContent) // treat as text
+				text += c.textContent; // treat as text
 
 				continue;
 
@@ -158,7 +184,12 @@ function XMLToJSON(element) {
 	}
 
 	// attributes is a hash map of 'Attribute Name' => 'Attribute Values'
-	var attributes = {};
+	var attributes = {
+		module: name,
+		children: children
+	};
+
+	text && (attributes.text = text);
 
 	var attrNodes = element.attributes;
 
@@ -168,7 +199,7 @@ function XMLToJSON(element) {
 		attributes[attr.nodeName] = value;
 	}
 
-	return [ name, attributes, children ];
+	return attributes;
 }
 
 /**
@@ -216,4 +247,18 @@ function toObjectPrototypeProperties(object) {
 	string = string.join(',\n');
 
 	return '{' + string + '}';
+}
+
+/**
+ * A dubious function that takes a number and
+ * returns a lexicographically sortable representation.
+ * TODO: only supports 3844 keys :(
+ *
+ * > toKey(42)
+ * "0G"
+ */
+var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), KEYS_LENGTH = KEYS.length;
+
+function toKey(n) {
+	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
 }
