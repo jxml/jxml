@@ -1,48 +1,59 @@
 import JXML from 'jx/JXML';
 
-export default function JXMLComponent(module, owner, attr) {
+/**
+ * JXMLComponent represents a JXML component. Components are sandboxed:
+ * communication between components is via message passing, mainly by
+ * setting attributes.
+ *
+ * JXMLComponent functions should not return values as their methods may be
+ * dispatched asynchronously.
+ */
+export default function JXMLComponent(renderer, module, uid, attr) {
+	uid = uid || 'root';
+	this.renderer  = renderer;
+	this.uid       = uid;
 	this.module    = module;
-	this.owner_uid = owner && owner.uid;
 	this.resolved  = false;
-	deepMerge(this.attr = {}, attr);
+
+	this.unresolved_attr = {};
+	this.attr = {};
+
+	if (attr)
+		this.setAttr(attr);
 }
 
 JXMLComponent.prototype.resolve = function() {
-	if (this.resolved) return;
+	if (this.resolved || this.resolving) return;
 
-	this.IDs = {};
+	this.resolving = true;
 
 	var self = this;
 
 	JXML.import(this.module, function(module) {
+		self.resolving = false;
+
 		var component = module.default;
 
 		self.resolved = new component(self);
 
 		if (self.resolved.template) {
 			// this is a JXMLComponent
-			var root = self.root = self.cloneTemplate(self.resolved.template);
+			var attr = self.resolved.template;
 
-			var extChildren = self.attr && self.attr.externalChildren;
-
-			if (extChildren) {
-				for (var k in extChildren) {
-					extChildren['Z' + k] = extChildren[k];
-					delete extChildren[k];
-				}
-			}
-
-			root.setAttr(self.attr);
+			var root = self.root = self.create(attr.module, attr);
 
 			self.resolved.init && self.resolved.init();
 
-			if (self.visible)
+			if (self.visible != false) // defaults to visible
 				self.show();
 		}
 		else {
 			// This is a rendering component
 			self.resolved.init && self.resolved.init();
 		}
+
+		self.applyAttr(self.unresolved_attr);
+		self.unresolved_attr = null;
 	});
 }
 
@@ -55,22 +66,20 @@ JXMLComponent.prototype.show = function() {
 		this.root.show();
 }
 
-JXMLComponent.prototype.render = function() {
-	if (!this.resolved)
-		return;
-
-	if (this.resolved.template)
-		return this.root && this.root.render();
-	else
-		return this.resolved.render && this.resolved.render();
-}
-
-JXMLComponent.prototype.create = function(module, attr) {
+JXMLComponent.prototype.create = function(module, attr, child_key) {
 	attr = attr || {};
 
-	// TODO: allow module overwrites
-	var element = JXML.create(module, this, attr);
+	var uid;
 
+	if (child_key)
+		uid = this.uid.replace(/:.*/, '') + ' ' + child_key;
+	else
+		uid = this.uid + ':' + module;
+
+	// TODO: allow module overwrites
+	var element = JXML.create(this.renderer, module, uid, attr);
+
+	// TODO: distinguish between uid, key, id
 	var id = attr.id;
 
 	if (id) {
@@ -82,61 +91,124 @@ JXMLComponent.prototype.create = function(module, attr) {
 	return element;
 }
 
-JXMLComponent.prototype.cloneTemplate = function(template) {
-	var tag    = template[0],
-		attr     = template[1],
-		children = template[2];
+/**
+ * Communicate with components mainly by setting attributes.
+ *
+ * Two types of components: Documents and (Render) Elements
+ *
+ * 1) Documents
+ * Documents have internal structure. They have a chance to mangle
+ * attributes before their root component receives the attributes.
+ *
+ * 2) Render Elements
+ * Render elements translate attributes to renderable properties.
+ * Renderable properties are defined by specific renderers. The
+ * default HTML and Canvas renderers accept properties like x, y,
+ * width, height, background and text.
+ *
+ */
+JXMLComponent.prototype.setAttr = function(delta) {
+	delta = copy(delta);
 
-	var element = this.create(tag, attr), child_elements = {};
+	// Transform external children
+	// TODO: handle slot/placement here
+	var delta_children = delta.children;
 
-	var text, children_index = 1;
-
-	for (var i = 0; i < children.length; i++) {
-		var child = children[i], child_element;
-
-		if (typeof child == 'string')
-			text = (text || '') + child;
-		else {
-			child_element = this.cloneTemplate(child, element);
-
-			var key = toKey(children_index++);
-			child_elements[key] = child_element;
+	if (delta_children) {
+		for (var k in delta_children) {
+			delta_children['Z' + k] = delta_children[k];
+			delete delta_children[k];
 		}
 	}
 
-	if (text)
-		element.setAttr({ text: text });
+	// show if true or not explicitly hidden
+	// TODO converting to string seems hacky
+	if ( ! /false/.test(delta.visible) )
+		this.show();
 
-	element.setAttr({ externalChildren: child_elements });
-
-	return element;
+	if (this.resolved)
+		this.applyAttr(delta);
+	else // component unresolved, save for later
+		JXML.deepMerge(this.unresolved_attr, delta);
 }
 
-JXMLComponent.prototype.setAttr = function(attr) {
-	this.attr = this.attr || {}
-	deepMerge(this.attr, attr);
+JXMLComponent.prototype.applyAttr = function(delta) {
+	if (this.root) { // component has internal structure
+		// Allow component to mangle attributes
+		if (this.resolved.onAttr)
+			this.resolved.onAttr(delta, this.attr);
+
+		JXML.deepMerge(this.attr, delta);
+
+		// Pass mangled attributes to root / 'superclass'
+		this.root.setAttr(delta);
+	}
+	else {
+		// Component is a rendering element
+		var delta_children = delta.children;
+
+		// Children are special and not passed to component
+		delete delta.children;
+
+		// Component is expected to return a renderlist/dirty
+		var dirty = this.resolved.render(delta, this.attr);
+
+		// Handle children from attributes delta
+		var dirty_children = this.applyChildrenAttr(delta_children);
+
+		if (dirty_children) {
+			dirty = dirty || {};
+			dirty.children = dirty_children;
+		}
+
+		if (!isEmpty(dirty))
+			this.onDirty(dirty);
+	}
+}
+
+JXMLComponent.prototype.applyChildrenAttr = function(delta_children) {
+	var children = this.children = this.children || {},
+		dirty_children = {},
+		dirty;
+
+	for (var k in delta_children) {
+		var child = delta_children[k];
+
+		if (!child) { // child is being removed
+			if (children[k]) {
+				// signal child for great destruction
+				this.children[k].destroy();
+				delete this.children[k];
+				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = null;
+			}
+		}
+		else { // child is being added or modified
+			if (children[k]) // modification
+				children[k].setAttr(child);
+			else {// creation
+				children[k] = this.create(child.module, child, k);
+				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = true;
+			}
+		}
+
+		dirty = true;
+	}
+
+	return dirty && dirty_children;
+}
+
+JXMLComponent.prototype.onDirty = function(dirty) {
+	var dirtylist = {};
+
+	dirtylist[this.uid.replace(/:.*/, '')] = copy(dirty);
+	this.renderer.onDirty(dirtylist);
 }
 
 /**
- * Merges map `src` into `dst`. Will not retain references
- * to any value in `src`.
- *
- * > a = {}, b = { moo: { cow: 42 } }, deepMerge(a, b), a.moo == b.moo
- * false
+ * Makes a deep JSON-serializable no-reference copy of given object
  */
-function deepMerge(dst, src) {
-	for (var k in src) {
-		var v = src[k];
-
-		if (v && typeof v == 'object') {
-			if (typeof dst[k] == 'object')
-				deepMerge(dst[k], v);
-			else
-				deepMerge(dst[k] = {}, v);
-		}
-		else
-			dst[k] = v;
-	}
+function copy(obj) {
+	return JSON.parse(JSON.stringify(obj || {}));
 }
 
 /**
@@ -151,4 +223,20 @@ var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.spli
 
 function toKey(n) {
 	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
+}
+
+/**
+ * Return true if `object` or its prototype has properties
+ *
+ * > isEmpty({})
+ * true
+ *
+ * > isEmpty({ moo: 42 })
+ * false
+ */
+function isEmpty(object) {
+	for (var k in object)
+		return false;
+
+	return true;
 }
