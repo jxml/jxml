@@ -1,8 +1,3 @@
-<Panel xmlns="jx/ui">
-	<script>
-		<![CDATA[
-			console.log('KitchenSink init');
-		]]>
-	</script>
-	<Label>The Kitchen Sink</Label>
+<Panel xmlns="jx/ui" label="The Kitchen Sink">
+	<Label y="40">Label</Label>
 </Panel>

@@ -38,13 +38,20 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 }
 
 HTMLRenderer.prototype.updateElement = function(uid, attr) {
-	var el = this.getElement(uid);
+	var el = this.getElement(uid), style = el.style;
 
 	if (attr.background)
-		el.style.background = attr.background;
+		style.background = attr.background;
 
 	if (attr.text)
 		el.textContent = attr.text;
+
+	if (attr.x)
+		style.left = attr.x + 'px';
+
+	if (attr.y)
+		style.top = attr.y + 'px';
+
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in attr.children) {

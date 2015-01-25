@@ -39,12 +39,15 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 
 	if (!attr) return;
 
+	ctx.save();
+	ctx.translate(attr.x | 0, attr.y | 0);
+
 	'width'  in attr || (attr.width  = 42);
 	'height' in attr || (attr.height = 42);
 
 	if (attr.background) {
 		ctx.fillStyle = attr.background;
-		ctx.fillRect(attr.x | 0, attr.y | 0, attr.width, attr.height);
+		ctx.fillRect(0, 0, attr.width, attr.height);
 	}
 
 	if (attr.text) {
@@ -59,4 +62,6 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 		for (var k in children)
 			this.paintElement(k);
 	}
+
+	ctx.restore();
 }
