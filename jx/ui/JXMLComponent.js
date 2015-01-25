@@ -63,7 +63,7 @@ JXMLComponent.prototype.show = function() {
 	if (!this.resolved)
 		this.resolve();
 	else
-		this.root.show();
+		this.root && this.root.show();
 }
 
 JXMLComponent.prototype.create = function(module, attr, child_key) {
@@ -78,15 +78,6 @@ JXMLComponent.prototype.create = function(module, attr, child_key) {
 
 	// TODO: allow module overwrites
 	var element = JXML.create(this.renderer, module, uid, attr);
-
-	// TODO: distinguish between uid, key, id
-	var id = attr.id;
-
-	if (id) {
-		if (this.IDs[id]) throw 'Duplicate ID';
-
-		this.IDs[id] = element;
-	}
 
 	return element;
 }

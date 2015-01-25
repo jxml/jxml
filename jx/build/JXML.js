@@ -20,6 +20,7 @@ JXML.prototype.build = function() {
 	};
 
 	this.parseXML(build_assets);
+	this.extractIDs(build_assets);
 	this.extractDocs(build_assets);
 	this.extractScript(build_assets);
 	this.generateJS(build_assets);
@@ -36,6 +37,34 @@ JXML.prototype.parseXML = function(build_assets) {
 		throw error[0];
 
 	build_assets.template = XMLToJSON(dom.documentElement);
+}
+
+/**
+ * Identifies elements in template with IDs and builds a map
+ * of IDs => path
+ */
+JXML.prototype.extractIDs = function(build_assets) {
+	var template = build_assets.template, IDs = {};
+
+	extractIDs(template);
+
+	function extractIDs(node, prefix) {
+		var id = node.id;
+
+		if (id) {
+			if (id in IDs)
+				throw 'Duplicate ID: ' + id;
+
+			IDs[id] = prefix || '';
+		}
+
+		prefix = prefix? prefix + ' ' : '';
+
+		for (var k in node.children)
+			extractIDs(node.children[k], prefix + k);
+	}
+
+	build_assets.IDs = IDs;
 }
 
 /**
@@ -81,17 +110,45 @@ JXML.prototype.extractScript = function(build_assets) {
 	}
 
 	// TODO: provide a proper scope for <script>s
-	script = [
-		'var attr = this.jxmlcomponent.attr',
-		'if (typeof onAttr != "undefined")',
-		'  this.onAttr = onAttr',
-		'if (typeof render != "undefined")',
-		'  this.render = render',
-		';',
-		script
-	].join('\n');
+	var stub = (function() {
+		var attr = this.jxmlcomponent.attr;
 
-	build_assets.script = script;
+		if (typeof onAttr != "undefined")
+		  this.onAttr = onAttr;
+		if (typeof render != "undefined")
+		  this.render = render;
+
+		if (this.jxmlcomponent.root)
+			var setAttr = this.jxmlcomponent.root.setAttr.bind(this.jxmlcomponent.root);
+
+		function LocalRef(id, path) {
+			this.id = id;
+
+			var node = this.path = {}, children_node, key;
+
+			path = path.split(' ');
+
+			while (path.length) {
+				children_node = node.children = {};
+				node = children_node[key = path.shift()] = {};
+			}
+
+			this.children_node = children_node;
+			this.key = key;
+		}
+
+		LocalRef.prototype.setAttr = function(attr) {
+			this.children_node[this.key] = attr;
+			setAttr(this.path);
+		}
+	}).toString().replace(/^[^{]+{|}$/g, '');
+
+	for (var id in build_assets.IDs)
+		stub += 'var $id = new LocalRef("$id", "$path");\n'
+			.replace(/\$id\b/g, id)
+			.replace(/\$path\b/g, build_assets.IDs[id]);
+
+	build_assets.script = stub + script;
 
 	function extractScript(node) {
 		var script = '';
@@ -112,7 +169,8 @@ JXML.prototype.generateJS = function(build_assets) {
 		null,
 		{
 			template: build_assets.template,
-			init:     new Function(build_assets.script)
+			init:     new Function(build_assets.script),
+			IDs:      build_assets.IDs
 		}
 	);
 
