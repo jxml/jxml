@@ -189,7 +189,7 @@ function XMLToJSON(element) {
 	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.localName,
 		children = {},
 		childNodes = element.childNodes,
-		children_index = 0,
+		children_index = 1,
 		text = '';
 
 	for (var i = 0; i < childNodes.length; i++) {
