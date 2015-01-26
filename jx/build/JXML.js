@@ -79,7 +79,7 @@ JXML.prototype.extractDocs = function(build_assets) {
 		var child = children[k];
 
 		if (/(^|\/)Doc$/.test(child.module)) {
-			docs.push(child_node);
+			docs.push(child);
 			delete children[k];
 		}
 	}
