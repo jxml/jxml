@@ -2,11 +2,7 @@ export default function JXML() {}
 
 import JXMLComponent from 'jx/ui/JXMLComponent';
 
-var implementation_map = {};
-var ComponentsMap = {};
-
-var components = {}, // God object
-	next_uid = 1;
+var components = {}; // God object
 
 /**
  * Always use JXML.create to instantiate JXML components.
