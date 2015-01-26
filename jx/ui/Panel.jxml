@@ -1,3 +1,11 @@
 <Element xmlns="jx/ui">
-	<Label background="gray">TODO: Insert title here</Label>
+	<script>
+		<![CDATA[
+			function onAttr(delta, attr) {
+				if ('label' in delta)
+					label.setAttr({ text: delta.label });
+			}
+		]]>
+	</script>
+	<Label id="label" background="yellow">Panel</Label>
 </Element>

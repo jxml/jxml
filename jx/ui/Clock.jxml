@@ -1,0 +1,24 @@
+<Element xmlns="jx/ui" width="100" height="100">
+	<script>
+		<![CDATA[
+			function pad(n) { return ('0' + n).slice(-2) }
+
+			function getTime() {
+				var now = new Date();
+
+				return [
+					pad(now.getHours()),
+					pad(now.getMinutes()),
+					pad(now.getSeconds())
+				].join(':');
+			}
+
+			function display() {
+				time.setAttr({ text: getTime() });
+			}
+
+			setInterval(display, 1000);
+		]]>
+	</script>
+	<Label id="time">..:..:..</Label>
+</Element>

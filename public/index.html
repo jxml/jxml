@@ -24,15 +24,9 @@
 				var name = params.app,
 					JXML = modules[0].default,
 					Renderer = modules[1].default,
-					app = JXML.create(name),
-					renderer = new Renderer(app);
+					renderer = new Renderer(name);
 
-				app.show();
-
-				// TODO: rendering should be automatic and continuous
-				setTimeout(function() {
-					renderer.render();
-				}, 1000);
+				renderer.app.show();
 			});
 		</script>
 	</body>

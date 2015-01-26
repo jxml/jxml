@@ -20,6 +20,7 @@ JXML.prototype.build = function() {
 	};
 
 	this.parseXML(build_assets);
+	this.extractIDs(build_assets);
 	this.extractDocs(build_assets);
 	this.extractScript(build_assets);
 	this.generateJS(build_assets);
@@ -39,20 +40,49 @@ JXML.prototype.parseXML = function(build_assets) {
 }
 
 /**
+ * Identifies elements in template with IDs and builds a map
+ * of IDs => path
+ */
+JXML.prototype.extractIDs = function(build_assets) {
+	var template = build_assets.template, IDs = {};
+
+	extractIDs(template);
+
+	function extractIDs(node, prefix) {
+		var id = node.id;
+
+		if (id) {
+			if (id in IDs)
+				throw 'Duplicate ID: ' + id;
+
+			IDs[id] = prefix || '';
+		}
+
+		prefix = prefix? prefix + ' ' : '';
+
+		for (var k in node.children)
+			extractIDs(node.children[k], prefix + k);
+	}
+
+	build_assets.IDs = IDs;
+}
+
+/**
  * Removes <Doc> from the template and puts in meta
  */
 JXML.prototype.extractDocs = function(build_assets) {
-	var template = build_assets.template, docs = [];
+	var template = build_assets.template,
+		children = template.children,
+		docs = [];
 
-	template[2] = template[2].filter(function(child_node) {
-		if (/(^|\/)Doc$/.test(child_node[0])) {
+	for (var k in children) {
+		var child = children[k];
+
+		if (/(^|\/)Doc$/.test(child.module)) {
 			docs.push(child_node);
-
-			return false;
+			delete children[k];
 		}
-
-		return true;
-	});
+	}
 
 	build_assets.meta.docs = docs;
 }
@@ -61,31 +91,74 @@ JXML.prototype.extractDocs = function(build_assets) {
  * Removes <script> from the template and puts in init
  */
 JXML.prototype.extractScript = function(build_assets) {
-	var template = build_assets.template, script = '';
+	var template = build_assets.template,
+		children = template.children,
+		script = extractScript(template);
 
-	template[2] = template[2].filter(extractScript);
-
-	if (!extractScript(template))
+	if (script)
+		// Rendering component, no document structure
 		build_assets.template = null;
+	else {
+		for (var k in children) {
+			var s = extractScript(children[k]);
+
+			if (s) {
+				script += s;
+				delete children[k];
+			}
+		}
+	}
 
 	// TODO: provide a proper scope for <script>s
-	script = 'var attr = this.jxmlcomponent.attr' + script;
+	var stub = (function() {
+		var attr = this.jxmlcomponent.attr;
 
-	build_assets.script = script;
+		if (typeof onAttr != "undefined")
+		  this.onAttr = onAttr;
+		if (typeof render != "undefined")
+		  this.render = render;
 
-	function extractScript(child_node) {
-		if (/(^|\/)script$/.test(child_node[0])) {
-			var s = child_node[2];
+		if (this.jxmlcomponent.root)
+			var setAttr = this.jxmlcomponent.root.setAttr.bind(this.jxmlcomponent.root);
 
-			if (Array.isArray(s))
-				s = s.join('');
+		function LocalRef(id, path) {
+			this.id = id;
 
-			script += s;
+			var node = this.path = {}, children_node, key;
 
-			return false;
+			path = path.split(' ');
+
+			while (path.length) {
+				children_node = node.children = {};
+				node = children_node[key = path.shift()] = {};
+			}
+
+			this.children_node = children_node;
+			this.key = key;
 		}
 
-		return true;
+		LocalRef.prototype.setAttr = function(attr) {
+			this.children_node[this.key] = attr;
+			setAttr(this.path);
+		}
+	}).toString().replace(/^[^{]+{|}$/g, '');
+
+	for (var id in build_assets.IDs)
+		stub += 'var $id = new LocalRef("$id", "$path");\n'
+			.replace(/\$id\b/g, id)
+			.replace(/\$path\b/g, build_assets.IDs[id]);
+
+	build_assets.script = stub + script;
+
+	function extractScript(node) {
+		var script = '';
+
+		if (/(^|\/)script$/.test(node.module))
+			return node.text;
+			//for (var k in node.children)
+				//script += node.children[k];
+
+		return script;
 	}
 }
 
@@ -96,7 +169,8 @@ JXML.prototype.generateJS = function(build_assets) {
 		null,
 		{
 			template: build_assets.template,
-			init:     new Function(build_assets.script)
+			init:     new Function(build_assets.script),
+			IDs:      build_assets.IDs
 		}
 	);
 
@@ -107,26 +181,16 @@ JXML.prototype.generateJS = function(build_assets) {
  * Converts an XML DOM to a JSON representation.
  *
  * > XMLToJSON('<Tag>moo</Tag>')
- * [ "Tag", {}, "moo" ]
+ * { "module": "Tag", "text": "moo" }
  *
- * > XMLToJSON(
- * ... 'testing' +
- * ... '<First top="true">' +
- * ... 	<Second />' +
- * ... 	Moo' +
- * ... 	<Second>Cow</Second>' +
- * ... </First>'
- * ... )
- * [ 'First', { top: "true" }, [
- *   [ 'Second', {}, [] ],
- *   'Moo',
- *   [ 'Second', {}, [ 'Cow' ] ]
- * ] ]
+ * TODO: text interleaved with elements not handled well
  */
 function XMLToJSON(element) {
 	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.tagName,
-		children = [],
-		childNodes = element.childNodes;
+		children = {},
+		childNodes = element.childNodes,
+		children_index = 1,
+		text = '';
 
 	for (var i = 0; i < childNodes.length; i++) {
 		var c = childNodes[i];
@@ -136,19 +200,17 @@ function XMLToJSON(element) {
 				continue;
 
 			case 3: // Text
-				var text = c.nodeValue.replace(/[ \t\n]+/g, ' '); // compress whitespace
-
-				children.push(text);
+				text += c.nodeValue.replace(/[ \t\n]+/g, ' '); // compress whitespace
 
 				continue;
 
 			case 1: // Element
-				children.push(XMLToJSON(c));
+				children[toKey(children_index++)] = XMLToJSON(c);
 
 				continue;
 
 			case 4: // CData
-				children.push(c.textContent) // treat as text
+				text += c.textContent; // treat as text
 
 				continue;
 
@@ -158,7 +220,10 @@ function XMLToJSON(element) {
 	}
 
 	// attributes is a hash map of 'Attribute Name' => 'Attribute Values'
-	var attributes = {};
+	var attributes = { module: name };
+
+	children && (attributes.children = children);
+	text     && (attributes.text = text);
 
 	var attrNodes = element.attributes;
 
@@ -168,7 +233,7 @@ function XMLToJSON(element) {
 		attributes[attr.nodeName] = value;
 	}
 
-	return [ name, attributes, children ];
+	return attributes;
 }
 
 /**
@@ -216,4 +281,18 @@ function toObjectPrototypeProperties(object) {
 	string = string.join(',\n');
 
 	return '{' + string + '}';
+}
+
+/**
+ * A dubious function that takes a number and
+ * returns a lexicographically sortable representation.
+ * TODO: only supports 3844 keys :(
+ *
+ * > toKey(42)
+ * "0G"
+ */
+var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), KEYS_LENGTH = KEYS.length;
+
+function toKey(n) {
+	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
 }
