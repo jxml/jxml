@@ -52,6 +52,12 @@ HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	if (attr.y)
 		style.top = attr.y + 'px';
 
+	if (attr.width)
+		style.width = attr.width + 'px';
+
+	if (attr.height)
+		style.height = attr.height + 'px';
+
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in attr.children) {
