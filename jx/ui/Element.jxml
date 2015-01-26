@@ -15,6 +15,12 @@
 			if ('y' in delta)
 				dirty.y = delta.y;
 
+			if ('width' in delta)
+				dirty.width = delta.width;
+
+			if ('height' in delta)
+				dirty.height = delta.height;
+
 			return dirty;
 		}
 

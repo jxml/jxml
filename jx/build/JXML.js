@@ -79,7 +79,7 @@ JXML.prototype.extractDocs = function(build_assets) {
 		var child = children[k];
 
 		if (/(^|\/)Doc$/.test(child.module)) {
-			docs.push(child_node);
+			docs.push(child);
 			delete children[k];
 		}
 	}
@@ -186,7 +186,7 @@ JXML.prototype.generateJS = function(build_assets) {
  * TODO: text interleaved with elements not handled well
  */
 function XMLToJSON(element) {
-	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.tagName,
+	var name = (element.namespaceURI? element.namespaceURI + '/' : '') + element.localName,
 		children = {},
 		childNodes = element.childNodes,
 		children_index = 1,
