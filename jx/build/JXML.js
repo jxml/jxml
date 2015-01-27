@@ -155,8 +155,6 @@ JXML.prototype.extractScript = function(build_assets) {
 
 		if (/(^|\/)script$/.test(node.module))
 			return node.text;
-			//for (var k in node.children)
-				//script += node.children[k];
 
 		return script;
 	}
