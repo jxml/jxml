@@ -1,0 +1,43 @@
+<Element xmlns="jx/ui">
+	<script>
+		<![CDATA[
+			function onAttr(delta, attr) {
+				calcLayout(delta, attr);
+			}
+
+			function calcLayout(delta, attr) {
+				// TODO: only calculate if something changed
+				var direction = delta.direction || attr.direction || 'vertical',
+					flow_dim = 'height', // flow dimension
+					full_dim = 'width',  // other dimension (full size)
+					xy = 'y';            // positional axis
+
+				if (direction == 'horizontal')
+					flow_dim = 'width',
+					full_dim = 'height',
+					xy = 'x';
+
+				var my_size = delta[flow_dim] || attr[flow_dim] || 100,
+					full_size = delta[full_dim] || attr[full_dim] || 100;
+
+				delta.children = delta.children || {};
+
+				for (var k in attr.children)
+					delta.children[k] = delta.children[k] || {};
+
+				var count = 0;
+
+				for (k in delta.children)
+					count++;
+
+				var i = 0, size = my_size / count;
+
+				for (k in delta.children) {
+					delta.children[k][xy] = i++ * size;
+					delta.children[k][flow_dim] = size;
+					delta.children[k][full_dim] = full_size;
+				}
+			}
+		]]>
+	</script>
+</Element>

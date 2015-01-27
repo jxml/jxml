@@ -1,5 +1,5 @@
-<Panel xmlns="jx/ui" label="The Kitchen Sink">
-	<Label y="40">Label</Label>
-	<Label y="80" textColor="red">Red Label</Label>
-	<Clock y="120"></Clock>
+<Panel xmlns="jx/ui" label="TheKitchenSink">
+	<Label>Label</Label>
+	<Label textColor="red">Red Label</Label>
+	<Clock/>
 </Panel>
