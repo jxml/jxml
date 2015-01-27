@@ -35,7 +35,6 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 		if (this.root_dom)
 			this.parent_dom.appendChild(this.root_dom);
 	}
-	console.log(this.renderlist);
 }
 
 HTMLRenderer.prototype.updateElement = function(uid, attr) {
