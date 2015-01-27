@@ -1,9 +1,9 @@
-export default (function() {
+var str = (function() {
 	$CONSTRUCTOR
-
 	$NAME.prototype = Object.create($SUPERCLASS, $PROTOTYPE);
-
-	"export default $NAME;"
 }).toString()
-	.replace(/^function[^{]*{|}$/g, '')
-	.replace(/^ *"(.*)";?$/mg, '$1')
+  .replace(/^function[^{]*{|}$/g, '');
+
+str += 'export default $NAME;'
+
+export default str;
