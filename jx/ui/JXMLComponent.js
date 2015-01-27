@@ -103,13 +103,14 @@ JXMLComponent.prototype.setAttr = function(delta) {
 
 	// Transform external children
 	// TODO: handle slot/placement here
-	var delta_children = delta.children;
 
-	if (delta_children) {
-		for (var k in delta_children) {
-			delta_children['Z' + k] = delta_children[k];
-			delete delta_children[k];
-		}
+	if (delta.children) {
+		var delta_children = {};
+
+		for (var k in delta.children)
+			delta_children['Z' + k] = delta.children[k];
+
+		delta.children = delta_children;
 	}
 
 	// show if true or not explicitly hidden
