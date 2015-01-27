@@ -30,10 +30,12 @@
 				for (k in delta.children)
 					count++;
 
-				var i = 0, size = my_size / count;
+				var gap = delta.gap || attr.gap || 10,
+					size = ( my_size - gap * (count - 1) ) / count,
+					i = 0;
 
 				for (k in delta.children) {
-					delta.children[k][xy] = i++ * size;
+					delta.children[k][xy] = i * gap + i++ * size;
 					delta.children[k][flow_dim] = size;
 					delta.children[k][full_dim] = full_size;
 				}

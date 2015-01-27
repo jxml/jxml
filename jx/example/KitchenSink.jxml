@@ -1,4 +1,4 @@
-<Panel xmlns="jx/ui" label="TheKitchenSink">
+<Panel xmlns="jx/ui" label="TheKitchenSink" width="600">
 	<Label>Label</Label>
 	<Label textColor="red">Red Label</Label>
 	<Clock/>
