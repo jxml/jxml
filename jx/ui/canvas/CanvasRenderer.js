@@ -22,8 +22,14 @@ CanvasRenderer.prototype.onDirty = function(dirtylist) {
 		this.root_uid = root.uid.replace(/:.*/, '');
 	}
 
-	if (this.root_uid)
+	if (this.root_uid) {
+		var render_root = this.renderlist[this.root_uid];
+
+		this.canvas.width = render_root.width;
+		this.canvas.height = render_root.height;
+
 		this.render(this.root_uid);
+	}
 }
 
 CanvasRenderer.prototype.render = function(root_uid) {
