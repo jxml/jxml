@@ -33,6 +33,15 @@
 			if ('textColor' in delta)
 				dirty.textColor = delta.textColor;
 
+			if ('fontFamily' in delta)
+				dirty.fontFamily = delta.fontFamily;
+
+			if ('fontSize' in delta)
+				dirty.fontSize = delta.fontSize;
+
+			if ('fontWeight' in delta)
+				dirty.fontWeight = delta.fontWeight;
+
 			return dirty;
 		}
 

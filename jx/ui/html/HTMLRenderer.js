@@ -73,6 +73,15 @@ HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	if (attr.textColor)
 		style.color= attr.textColor;
 
+	if (attr.fontFamily)
+		style.fontFamily = attr.fontFamily;
+
+	if (attr.fontSize)
+		style.fontSize = attr.fontSize + 'px';
+
+	if (attr.fontWeight)
+		style.fontWeight = attr.fontWeight;
+
 	// TODO appendChild called more often than needed
 	for (var child_uid in attr.children) {
 		var child_el = this.getElement(child_uid);

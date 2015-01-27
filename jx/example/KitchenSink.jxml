@@ -1,5 +1,6 @@
-<Panel xmlns="jx/ui" label="TheKitchenSink" width="600">
+<Panel xmlns="jx/ui" label="TheKitchenSink" width="600" height="500">
 	<Label>Label</Label>
 	<Label textColor="red">Red Label</Label>
+	<FillText>FillText</FillText>
 	<Clock/>
 </Panel>

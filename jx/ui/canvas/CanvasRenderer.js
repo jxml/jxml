@@ -52,6 +52,7 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 
 	if (attr.text) {
 		ctx.fillStyle = attr.textColor || '#000';
+		ctx.font = (attr.fontSize || 12) + 'px ' + (attr.fontFamily || 'sans-serif');
 		ctx.textBaseline = 'top';
 		ctx.fillText(attr.text, 0, 0);
 	}
