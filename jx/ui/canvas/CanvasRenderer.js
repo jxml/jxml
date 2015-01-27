@@ -51,7 +51,7 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 	}
 
 	if (attr.text) {
-		ctx.fillStyle = '#000';
+		ctx.fillStyle = attr.textColor || '#000';
 		ctx.textBaseline = 'top';
 		ctx.fillText(attr.text, 0, 0);
 	}

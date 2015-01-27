@@ -35,16 +35,11 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 		if (this.root_dom)
 			this.parent_dom.appendChild(this.root_dom);
 	}
+	console.log(this.renderlist);
 }
 
 HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	var el = this.getElement(uid), style = el.style;
-
-	if (attr.background)
-		style.background = attr.background;
-
-	if (attr.text)
-		el.textContent = attr.text;
 
 	if (attr.x)
 		style.left = attr.x + 'px';
@@ -58,6 +53,14 @@ HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	if (attr.height)
 		style.height = attr.height + 'px';
 
+	if (attr.background)
+		style.background = attr.background;
+
+	if (attr.text)
+		el.textContent = attr.text;
+
+	if (attr.textColor)
+		style.color= attr.textColor;
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in attr.children) {
