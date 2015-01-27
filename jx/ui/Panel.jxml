@@ -1,4 +1,4 @@
-<Element xmlns="jx/ui">
+<Box xmlns="jx/ui">
 	<script>
 		<![CDATA[
 			function onAttr(delta, attr) {
@@ -8,4 +8,4 @@
 		]]>
 	</script>
 	<Label id="label" background="yellow">Panel</Label>
-</Element>
+</Box>

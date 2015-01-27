@@ -56,6 +56,17 @@ HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	if (attr.background)
 		style.background = attr.background;
 
+	if (attr.cornerRadius)
+		style.borderRadius = attr.cornerRadius + 'px';
+
+	if (attr.borderColor)
+		style.borderColor = attr.borderColor;
+
+	if (attr.borderWidth) {
+		style.borderWidth = attr.borderWidth + 'px';
+		style.borderStyle = 'solid';
+	}
+
 	if (attr.text)
 		el.textContent = attr.text;
 
@@ -79,6 +90,7 @@ HTMLRenderer.prototype.getElement = function(uid, tag) {
 
 	el.id = 'jx:' + uid;
 	style.position = 'absolute';
+	style.boxSizing = 'border-box';
 	this.elements[uid] = el;
 
 	return el;

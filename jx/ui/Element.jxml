@@ -18,6 +18,15 @@
 			if ('background' in delta)
 				dirty.background = delta.background;
 
+			if ('borderColor' in delta)
+				dirty.borderColor = delta.borderColor;
+
+			if ('borderWidth' in delta)
+				dirty.borderWidth = delta.borderWidth;
+
+			if ('cornerRadius' in delta)
+				dirty.cornerRadius = delta.cornerRadius;
+
 			if ('text' in delta)
 				dirty.text = delta.text;
 
