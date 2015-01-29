@@ -179,7 +179,8 @@ JXMLComponent.prototype.applyChildrenAttr = function(delta_children) {
 				children[k].setAttr(child);
 			else {// creation
 				children[k] = this.create(child.module, child, k);
-				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = true;
+				// Mark children as dirty and pass along unresolved_attr
+				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = children[k].unresolved_attr;
 			}
 		}
 

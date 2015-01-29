@@ -83,7 +83,8 @@ HTMLRenderer.prototype.updateElement = function(uid, attr) {
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in attr.children) {
-		var child_el = this.getElement(child_uid);
+		var tag = attr.children[child_uid].tag;
+		var child_el = this.getElement(child_uid, tag);
 
 		el.appendChild(child_el);
 	}
