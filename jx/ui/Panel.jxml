@@ -7,5 +7,5 @@
 			}
 		]]>
 	</script>
-	<Label id="label" background="yellow">Panel</Label>
+	<Label id="label" background="yellow" height="50" borderWidth="10" borderColor="green">Panel</Label>
 </Box>
