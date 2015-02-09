@@ -40,10 +40,10 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	var el = this.getElement(uid), style = el.style;
 
-	if (attr.x)
+	if (typeof attr.x !== 'undefined')
 		style.left = attr.x + 'px';
 
-	if (attr.y)
+	if (typeof attr.y !== 'undefined')
 		style.top = attr.y + 'px';
 
 	if (attr.width)
