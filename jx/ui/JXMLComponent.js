@@ -130,7 +130,7 @@ JXMLComponent.prototype.applyAttr = function(delta) {
 		if (this.resolved.onDelta)
 			this.resolved.onDelta(delta, this.attr);
 
-		JXML.deepMerge(this.attr, delta);
+		delta = JXML.mergeDiff(this.attr, delta);
 
 		if (this.resolved.onAttr && delta)
 			this.resolved.onAttr(this.attr, delta);
