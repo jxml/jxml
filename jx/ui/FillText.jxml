@@ -1,7 +1,7 @@
 <Label xmlns="jx/ui">
 	<script>
 		<![CDATA[
-			function onAttr(delta, attr) {
+			function onAttr(attr, delta) {
 				if ( delta.text || attr.text
 					&& (delta.height || attr.height) ) {
 					delta.fontSize = delta.height || attr.height || 12;

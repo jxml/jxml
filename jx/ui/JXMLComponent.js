@@ -127,13 +127,17 @@ JXMLComponent.prototype.setAttr = function(delta) {
 JXMLComponent.prototype.applyAttr = function(delta) {
 	if (this.root) { // component has internal structure
 		// Allow component to mangle attributes
-		if (this.resolved.onAttr)
-			this.resolved.onAttr(delta, this.attr);
+		if (this.resolved.onDelta)
+			this.resolved.onDelta(delta, this.attr);
 
 		JXML.deepMerge(this.attr, delta);
 
+		if (this.resolved.onAttr && delta)
+			this.resolved.onAttr(this.attr, delta);
+
 		// Pass mangled attributes to root / 'superclass'
 		this.root.setAttr(delta);
+
 	}
 	else {
 		// Component is a rendering element

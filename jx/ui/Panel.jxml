@@ -1,7 +1,7 @@
 <Box xmlns="jx/ui">
 	<script>
 		<![CDATA[
-			function onAttr(delta, attr) {
+			function onAttr(attr, delta) {
 				if ('label' in delta)
 					label.setAttr({ text: delta.label });
 			}
