@@ -40,45 +40,45 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 HTMLRenderer.prototype.updateElement = function(uid, attr) {
 	var el = this.getElement(uid), style = el.style;
 
-	if (attr.x)
+	if ('x' in attr)
 		style.left = attr.x + 'px';
 
-	if (attr.y)
+	if ('y' in attr)
 		style.top = attr.y + 'px';
 
-	if (attr.width)
+	if ('width' in attr)
 		style.width = attr.width + 'px';
 
-	if (attr.height)
+	if ('height' in attr)
 		style.height = attr.height + 'px';
 
-	if (attr.background)
+	if ('background' in attr)
 		style.background = attr.background;
 
-	if (attr.cornerRadius)
+	if ('cornerRadius' in attr)
 		style.borderRadius = attr.cornerRadius + 'px';
 
-	if (attr.borderColor)
+	if ('borderColor' in attr)
 		style.borderColor = attr.borderColor;
 
-	if (attr.borderWidth) {
+	if ('borderWidth' in attr) {
 		style.borderWidth = attr.borderWidth + 'px';
 		style.borderStyle = 'solid';
 	}
 
-	if (attr.text)
+	if ('text' in attr)
 		el.textContent = attr.text;
 
-	if (attr.textColor)
+	if ('textColor' in attr)
 		style.color= attr.textColor;
 
-	if (attr.fontFamily)
+	if ('fontFamily' in attr)
 		style.fontFamily = attr.fontFamily;
 
-	if (attr.fontSize)
+	if ('fontSize' in attr)
 		style.fontSize = attr.fontSize + 'px';
 
-	if (attr.fontWeight)
+	if ('fontWeight' in attr)
 		style.fontWeight = attr.fontWeight;
 
 	// TODO appendChild called more often than needed
