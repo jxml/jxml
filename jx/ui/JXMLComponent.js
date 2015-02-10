@@ -127,13 +127,17 @@ JXMLComponent.prototype.setAttr = function(delta) {
 JXMLComponent.prototype.applyAttr = function(delta) {
 	if (this.root) { // component has internal structure
 		// Allow component to mangle attributes
-		if (this.resolved.onAttr)
-			this.resolved.onAttr(delta, this.attr);
+		if (this.resolved.onDelta)
+			this.resolved.onDelta(delta, this.attr);
 
-		JXML.deepMerge(this.attr, delta);
+		delta = JXML.mergeDiff(this.attr, delta);
+
+		if (this.resolved.onAttr && delta)
+			this.resolved.onAttr(this.attr, delta);
 
 		// Pass mangled attributes to root / 'superclass'
 		this.root.setAttr(delta);
+
 	}
 	else {
 		// Component is a rendering element
@@ -145,12 +149,14 @@ JXMLComponent.prototype.applyAttr = function(delta) {
 		// Component is expected to return a renderlist/dirty
 		var dirty = this.resolved.render(delta, this.attr);
 
-		// Handle children from attributes delta
-		var dirty_children = this.applyChildrenAttr(delta_children);
+		if (delta_children) {
+			// Handle children from attributes delta
+			var dirty_children = this.applyChildrenAttr(delta_children);
 
-		if (dirty_children) {
-			dirty = dirty || {};
-			dirty.children = dirty_children;
+			if (dirty_children) {
+				dirty = dirty || {};
+				dirty.children = dirty_children;
+			}
 		}
 
 		if (!isEmpty(dirty))

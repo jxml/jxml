@@ -8,7 +8,7 @@
 		<script>
 			System.config({ baseURL: 'lib' });
 
-			var params = {
+			var app, params = {
 				app: 'jx/example/KitchenSink',
 				renderer: 'jx/ui/html/HTMLRenderer'
 			};
@@ -26,8 +26,20 @@
 					Renderer = modules[1].default,
 					renderer = new Renderer(name);
 
-				renderer.app.show();
+				app = renderer.app;
+				app.show();
 			});
+
+			function setLayout() {
+				app && app.setAttr({
+					x: 20,
+					y: 20,
+					width: innerWidth - 40,
+					height: innerHeight - 40
+				});
+			}
+
+			window.onresize = setLayout;
 		</script>
 	</body>
 </html>

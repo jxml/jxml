@@ -54,3 +54,30 @@ JXML.deepMerge = function deepMerge(dst, src) {
 			dst[k] = v;
 	}
 }
+
+/**
+ * Same as deepMerge but returns data that actually changed.
+ */
+JXML.mergeDiff = function mergeDiff(dst, src) {
+	var diff;
+
+	for (var k in src) {
+		var v = src[k], d;
+
+		if (v == dst[k]) continue;
+
+		if (v && typeof v == 'object') {
+			if (typeof dst[k] == 'object')
+				d = mergeDiff(dst[k], v);
+			else
+				d = mergeDiff(dst[k] = {}, v);
+
+			if (d)
+				( diff || (diff = {}) )[k] = d;
+		}
+		else
+			( diff || (diff = {}) )[k] = dst[k] = v;
+	}
+
+	return diff;
+}

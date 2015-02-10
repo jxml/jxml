@@ -1,13 +1,15 @@
 <Element xmlns="jx/ui">
 	<script>
 		<![CDATA[
-			function onAttr(delta, attr) {
-				calcLayout(delta, attr);
+			function onAttr(attr, delta) {
+				calcLayout(attr, delta);
 			}
 
-			function calcLayout(delta, attr) {
+			function calcLayout(attr, delta) {
 				// TODO: only calculate if something changed
-				var direction = delta.direction || attr.direction || 'vertical',
+
+				// Determine direction of flow or default to vertical
+				var direction = attr.direction || 'vertical',
 					flow_dim = 'height', // dimension in the flow direction
 					full_dim = 'width',  // other dimension (full size)
 					flow_axis = 'y',     // positional axis
@@ -15,34 +17,30 @@
 					MIN_SIZE = 10,       // minimum element size
 					num_children = 0;    // number of children
 
-				if (direction == 'horizontal')
+				// check if horizontal direction is specified or if width > height to determine direction
+				if (direction == 'horizontal' || attr.width > attr.height)
 					flow_dim = 'width',
 					full_dim = 'height',
 					flow_axis = 'x',
 					full_axis = 'y';
 
-				var padding = int(delta['padding'] || attr['padding']) || 0,
-					border = int(delta['borderWidth'] || attr['borderWidth']) || 0,
-					my_size = (delta[flow_dim] || attr[flow_dim] || 100) - (padding + border) * 2,
-					full_size = (delta[full_dim] || attr[full_dim] || 100) - (padding + border) * 2;
-
-				delta.children = delta.children || {};
-
-				for (var k in attr.children)
-					delta.children[k] = delta.children[k] || {};
+				var padding = attr['padding'] || 0,
+					border = attr['borderWidth'] || 0,
+					my_size = (attr[flow_dim] || 100) - (padding + border) * 2,
+					full_size = (attr[full_dim] || 100) - (padding + border) * 2;
 
 				var num_specified = 0, total_specified_size = 0;
 
-				for (k in delta.children) {
-					if (delta.children[k][flow_dim]) {
-						total_specified_size += int(delta.children[k][flow_dim]) || 0;
+				for (var k in attr.children) {
+					if (attr.children[k][flow_dim]) {
+						total_specified_size += attr.children[k][flow_dim] || 0;
 						num_specified++;
 					}
 
 					num_children++;
 				}
 
-				var gap = int(delta.gap || attr.gap) || 0,
+				var gap = attr.gap || 0,
 					avail_space = my_size - gap * (num_children - 1), // available space for all elements
 					position = padding, // current position for next element
 					size = 0;
@@ -51,19 +49,24 @@
 					// distribute remaining space over unspecified elements
 					size = (avail_space - total_specified_size) / (num_children - num_specified);
 
-				for (k in delta.children) {
-					var child = delta.children[k];
+				delta.children = delta.children || {};
 
-					if (!child[flow_dim]) child[flow_dim] = Math.max(size, MIN_SIZE);
-					if (!child[full_dim]) child[full_dim] = full_size;
+				for (var k in attr.children)
+					delta.children[k] = delta.children[k] || {};
 
-					child[full_axis] = padding;
-					child[flow_axis] = position;
-					position += gap + (int(child[flow_dim]));
+				// TODO: Order matters
+				for (k in attr.children) {
+					var child = attr.children[k],
+						delta_child = delta.children[k];
+
+					if (!child[flow_dim]) delta_child[flow_dim] = Math.max(size, MIN_SIZE);
+					if (!child[full_dim]) delta_child[full_dim] = full_size;
+
+					delta_child[full_axis] = padding;
+					delta_child[flow_axis] = position;
+					position += gap + (child[flow_dim] || delta_child[flow_dim]);
 				}
 			}
-
-			function int(n) { return parseInt(n, 10) }
 		]]>
 	</script>
 </Element>
