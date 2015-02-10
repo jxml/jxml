@@ -2,10 +2,10 @@
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {
-				if ('label' in delta)
-					label.setAttr({ text: delta.label });
+				if ('title' in delta)
+					title.setAttr({ text: delta.label });
 			}
 		]]>
 	</script>
-	<Label id="label" background="yellow" height="50" borderWidth="10" borderColor="green">Panel</Label>
+	<Label id="title" background="yellow" height="50" borderWidth="10" borderColor="green">Panel</Label>
 </Box>
