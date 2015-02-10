@@ -9,16 +9,21 @@
 				// TODO: only calculate if something changed
 
 				// Determine direction of flow or default to vertical
-				var direction = attr.direction || 'vertical',
-					flow_dim = 'height', // dimension in the flow direction
-					full_dim = 'width',  // other dimension (full size)
-					flow_axis = 'y',     // positional axis
-					full_axis = 'x',     // other axis (full size)
-					MIN_SIZE = 10,       // minimum element size
-					num_children = 0;    // number of children
+				var direction = attr.direction || (attr.width > attr.height ? 'horizontal' : 'vertical'),
+					flow_dim,          // dimension in the flow direction
+					full_dim,          // other dimension (full size)
+					flow_axis,         // positional axis
+					full_axis,         // other axis (full size)
+					MIN_SIZE = 10,     // minimum element size
+					num_children = 0;  // number of children
 
-				// check if horizontal direction is specified or if width > height to determine direction
-				if (direction == 'horizontal' || attr.width > attr.height)
+				if (direction == 'vertical')
+					flow_dim = 'height',
+					full_dim = 'width',
+					flow_axis = 'y',
+					full_axis = 'x';
+
+				else if (direction == 'horizontal')
 					flow_dim = 'width',
 					full_dim = 'height',
 					flow_axis = 'x',
