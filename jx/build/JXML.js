@@ -228,7 +228,7 @@ function XMLToJSON(element) {
 	for (i = 0; i < attrNodes.length; i++) {
 		var attr = attrNodes[i], value = attr.nodeValue;
 
-		attributes[attr.nodeName] = value;
+		attributes[attr.nodeName] = autoConvert(value);
 	}
 
 	return attributes;
@@ -293,4 +293,21 @@ var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.spli
 
 function toKey(n) {
 	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
+}
+
+/**
+ * If a string looks like a JS type, convert it
+ *
+ * > autoConvert("42");
+ * 42
+ *
+ * > autoConvert("moocow");
+ * "moocow"
+ *
+ * > autoConvert("true");
+ * true
+ */
+function autoConvert(str) {
+	try { return JSON.parse(str) }
+	catch(e) { return str }
 }

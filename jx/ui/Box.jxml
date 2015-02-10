@@ -24,8 +24,8 @@
 					flow_axis = 'x',
 					full_axis = 'y';
 
-				var padding = int(attr['padding']) || 0,
-					border = int(attr['borderWidth']) || 0,
+				var padding = attr['padding'] || 0,
+					border = attr['borderWidth'] || 0,
 					my_size = (attr[flow_dim] || 100) - (padding + border) * 2,
 					full_size = (attr[full_dim] || 100) - (padding + border) * 2;
 
@@ -33,14 +33,14 @@
 
 				for (var k in attr.children) {
 					if (attr.children[k][flow_dim]) {
-						total_specified_size += int(attr.children[k][flow_dim]) || 0;
+						total_specified_size += attr.children[k][flow_dim] || 0;
 						num_specified++;
 					}
 
 					num_children++;
 				}
 
-				var gap = int(attr.gap) || 0,
+				var gap = attr.gap || 0,
 					avail_space = my_size - gap * (num_children - 1), // available space for all elements
 					position = padding, // current position for next element
 					size = 0;
@@ -64,11 +64,9 @@
 
 					delta_child[full_axis] = padding;
 					delta_child[flow_axis] = position;
-					position += gap + (int(child[flow_dim] || delta_child[flow_dim]));
+					position += gap + (child[flow_dim] || delta_child[flow_dim]);
 				}
 			}
-
-			function int(n) { return parseInt(n, 10) }
 		]]>
 	</script>
 </Element>
