@@ -57,6 +57,8 @@ JXML.deepMerge = function deepMerge(dst, src) {
 
 /**
  * Same as deepMerge but returns data that actually changed.
+ * Null or undefined values mean "delete this key" and are
+ * propagated to the diff.
  */
 JXML.mergeDiff = function mergeDiff(dst, src) {
 	var diff;
@@ -66,7 +68,11 @@ JXML.mergeDiff = function mergeDiff(dst, src) {
 
 		if (v == dst[k]) continue;
 
-		if (v && typeof v == 'object') {
+		if (v == null) { // deleting a key
+			delete dst[k];
+			( diff || (diff = {}) )[k] = null;
+		}
+		else if (typeof v == 'object') {
 			if (typeof dst[k] == 'object')
 				d = mergeDiff(dst[k], v);
 			else
