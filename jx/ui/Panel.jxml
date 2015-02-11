@@ -3,7 +3,7 @@
 		<![CDATA[
 			function onAttr(attr, delta) {
 				if ('title' in delta)
-					title.setAttr({ text: delta.label });
+					title.setAttr({ text: delta.title });
 			}
 		]]>
 	</script>
