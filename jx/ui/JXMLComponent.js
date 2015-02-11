@@ -126,14 +126,13 @@ JXMLComponent.prototype.setAttr = function(delta) {
 
 JXMLComponent.prototype.applyAttr = function(delta) {
 	if (this.root) { // component has internal structure
-		// Allow component to mangle attributes
-		if (this.resolved.onDelta)
-			this.resolved.onDelta(delta, this.attr);
-
 		delta = JXML.mergeDiff(this.attr, delta);
 
+		// Allow component to mangle attributes
 		if (this.resolved.onAttr && delta)
 			this.resolved.onAttr(this.attr, delta);
+
+		// TODO: onAttr should return a diff instead of mangling delta
 
 		// Pass mangled attributes to root / 'superclass'
 		this.root.setAttr(delta);
