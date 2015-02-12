@@ -56,6 +56,15 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 		ctx.fillRect(0, 0, attr.width, attr.height);
 	}
 
+	if (attr.borderWidth) {
+		var lineWidth = attr.borderWidth
+
+		ctx.strokeStyle = attr.borderColor || '#000';
+		ctx.lineWidth = lineWidth;
+		ctx.strokeRect(lineWidth * 0.5, lineWidth * 0.5, attr.width - lineWidth, attr.height - lineWidth);
+		ctx.translate(lineWidth, lineWidth);
+	}
+
 	if (attr.text) {
 		ctx.fillStyle = attr.textColor || '#000';
 		ctx.font = (attr.fontSize || 12) + 'px ' + (attr.fontFamily || 'sans-serif');
