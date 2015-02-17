@@ -8,7 +8,7 @@
 			function calcLayout(attr, delta) {
 				// TODO: only calculate if something changed
 
-				// Determine direction of flow or default to vertical
+				// Determine direction of flow
 				var direction = attr.direction || (attr.width > attr.height ? 'horizontal' : 'vertical'),
 					flow_dim,          // dimension in the flow direction
 					full_dim,          // other dimension (full size)
@@ -38,7 +38,9 @@
 
 				for (var k in attr.children) {
 					if (attr.children[k][flow_dim]) {
-						total_specified_size += attr.children[k][flow_dim] || 0;
+						var s = attr.children[k][flow_dim] || 0;
+						if (/^\d*%$/.test(attr.children[k][flow_dim])) s = my_size * parseFloat(attr.children[k][flow_dim]) / 100.0;
+						total_specified_size += s;
 						num_specified++;
 					}
 
@@ -64,12 +66,14 @@
 					var child = attr.children[k],
 						delta_child = delta.children[k];
 
+					// TODO: !child[flow_dim] might not work for numeric zeroes
 					if (!child[flow_dim]) delta_child[flow_dim] = Math.max(size, MIN_SIZE);
+					if (/^\d*%$/.test(child[flow_dim])) delta_child[flow_dim] = my_size * parseFloat(child[flow_dim]) / 100.0;
 					if (!child[full_dim]) delta_child[full_dim] = full_size;
 
 					delta_child[full_axis] = padding;
 					delta_child[flow_axis] = position;
-					position += gap + (child[flow_dim] || delta_child[flow_dim]);
+					position += gap + (delta_child[flow_dim]);
 				}
 			}
 		]]>

@@ -2,10 +2,22 @@
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {
-				if ( delta.text || attr.text
-					&& (delta.height || attr.height) ) {
-					delta.fontSize = delta.height || attr.height || 12;
+				if (attr.text && attr.height && attr.width) {
+					var ratio = estimate_ratio(attr.text);
+
+					if ( ratio <= (attr.width / attr.height) )
+						delta.fontSize = attr.height;
+					else
+						delta.fontSize = attr.width / ratio;
 				}
+
+				if ('textValign' in attr) {
+					delta.textValign = attr.textValign;
+				}
+			}
+
+			function estimate_ratio(str) {
+				return str.length * 0.5;
 			}
 		]]>
 	</script>

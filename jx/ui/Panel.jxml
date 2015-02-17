@@ -7,5 +7,7 @@
 			}
 		]]>
 	</script>
-	<Label id="title" background="yellow" height="50" borderWidth="10" borderColor="green">Panel</Label>
+	<Box height="50" background="#555" padding="10">
+		<FillText id="title" textAlign="center" textColor="white" fontFamily="DIN Next LT Pro" fontWeight="lighter">Panel</FillText>
+	</Box>
 </Box>
