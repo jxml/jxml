@@ -23,9 +23,9 @@
 
 				// Override default gap/padding/border if specified
 				if ('gap' in attr)
-					gap = attr.gap;
+					gap = isPercentage(attr.gap) ? attr.height * parseFloat(attr.gap) / 100.0 : attr.gap;
 				if ('padding' in attr)
-					padding = attr.padding;
+					padding = isPercentage(attr.padding) ? (attr.height || 100) * parseFloat(attr.padding) / 100.0 : attr.padding;
 				if ('borderWidth' in attr)
 					border = attr.borderWidth;
 
@@ -84,7 +84,7 @@
 
 					delta_child[full_axis] = padding;
 					delta_child[flow_axis] = position;
-					position += gap + (delta_child[flow_dim]);
+					position += gap + (delta_child[flow_dim] || child[flow_dim]);
 				}
 			}
 			 function isPercentage(p) { return /^\d*%$/.test(p) }
