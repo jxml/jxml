@@ -84,7 +84,6 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 		style.textAlign= delta.textAlign;
 
 	if ('lineHeight' in delta) {
-		console.log('lineHeight',delta.lineHeight);
 		style.lineHeight = delta.lineHeight;
 	}
 

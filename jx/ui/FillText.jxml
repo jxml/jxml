@@ -10,12 +10,9 @@
 					else
 						delta.fontSize = attr.width / ratio;
 				}
-
-				if ('textValign' in attr) {
-					delta.textValign = attr.textValign;
-				}
 			}
 
+			// TODO: Such hack. Find a better way to do this!
 			function estimate_ratio(str) {
 				return str.length * 0.5;
 			}

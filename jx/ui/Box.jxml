@@ -21,14 +21,6 @@
 					padding = 0,       // box padding
 					border = 0;        // box border
 
-				// Override default gap/padding/border if specified
-				if ('gap' in attr)
-					gap = isPercentage(attr.gap) ? attr.height * parseFloat(attr.gap) / 100.0 : attr.gap;
-				if ('padding' in attr)
-					padding = isPercentage(attr.padding) ? (attr.height || 100) * parseFloat(attr.padding) / 100.0 : attr.padding;
-				if ('borderWidth' in attr)
-					border = attr.borderWidth;
-
 				// Override default flow direction if specified
 				if (direction == 'vertical')
 					flow_dim = 'height',
@@ -42,6 +34,14 @@
 					flow_axis = 'x',
 					full_axis = 'y';
 
+				// Override default gap/padding/border if specified
+				if ('gap' in attr)
+					gap = isPercentage(attr.gap) ? parsePercentage(attr.gap, attr) : attr.gap;
+				if ('padding' in attr)
+					padding = isPercentage(attr.padding) ? parsePercentage(attr.padding, attr) : attr.padding;
+				if ('borderWidth' in attr)
+					border = attr.borderWidth;
+
 				var
 					num_specified = 0,
 					total_specified_size = 0,
@@ -51,7 +51,10 @@
 				for (var k in attr.children) {
 					if (attr.children[k][flow_dim]) {
 						var s = attr.children[k][flow_dim] || 0;
-						if (isPercentage(attr.children[k][flow_dim])) s = my_size * parseFloat(attr.children[k][flow_dim]) / 100.0;
+
+						if (isPercentage(s))
+							s = my_size * parseFloat(s) / 100.0;
+
 						total_specified_size += s;
 						num_specified++;
 					}
@@ -87,7 +90,14 @@
 					position += gap + (delta_child[flow_dim] || child[flow_dim]);
 				}
 			}
-			 function isPercentage(p) { return /^\d*%$/.test(p) }
+			function isPercentage(p) { return /^\d*\.?\d+%$/.test(p) }
+
+			function parsePercentage(p, attr) {
+				if ('height' in attr && 'width' in attr)
+					return (Math.min(attr.height, attr.width)) * parseFloat(p) / 100.0;
+				else
+					return (attr.height || attr.width || 100) * parseFloat(p) / 100.0;
+			}
 		]]>
 	</script>
 </Element>
