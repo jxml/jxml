@@ -15,6 +15,9 @@
 			if ('height' in delta)
 				dirty.height = delta.height;
 
+			if ('lineHeight' in delta)
+				dirty.lineHeight = delta.lineHeight;
+
 			if ('background' in delta)
 				dirty.background = delta.background;
 
@@ -32,6 +35,12 @@
 
 			if ('textColor' in delta)
 				dirty.textColor = delta.textColor;
+
+			if ('textAlign' in delta)
+				dirty.textAlign = delta.textAlign;
+
+			if ('textValign' in delta)
+				dirty.textValign = delta.textValign;
 
 			if ('fontFamily' in delta)
 				dirty.fontFamily = delta.fontFamily;

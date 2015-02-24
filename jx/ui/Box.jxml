@@ -8,15 +8,20 @@
 			function calcLayout(attr, delta) {
 				// TODO: only calculate if something changed
 
-				// Determine direction of flow or default to vertical
-				var direction = attr.direction || (attr.width > attr.height ? 'horizontal' : 'vertical'),
+				// Determine direction of flow
+				var
+					direction = attr.direction || (attr.width > attr.height ? 'horizontal' : 'vertical'),
 					flow_dim,          // dimension in the flow direction
 					full_dim,          // other dimension (full size)
 					flow_axis,         // positional axis
 					full_axis,         // other axis (full size)
 					MIN_SIZE = 10,     // minimum element size
-					num_children = 0;  // number of children
+					num_children = 0,  // number of children
+					gap = 0,           // box gap
+					padding = 0,       // box padding
+					border = 0;        // box border
 
+				// Override default flow direction if specified
 				if (direction == 'vertical')
 					flow_dim = 'height',
 					full_dim = 'width',
@@ -29,23 +34,35 @@
 					flow_axis = 'x',
 					full_axis = 'y';
 
-				var padding = attr['padding'] || 0,
-					border = attr['borderWidth'] || 0,
+				// Override default gap/padding/border if specified
+				if ('gap' in attr)
+					gap = isPercentage(attr.gap) ? parsePercentage(attr.gap, attr) : attr.gap;
+				if ('padding' in attr)
+					padding = isPercentage(attr.padding) ? parsePercentage(attr.padding, attr) : attr.padding;
+				if ('borderWidth' in attr)
+					border = attr.borderWidth;
+
+				var
+					num_specified = 0,
+					total_specified_size = 0,
 					my_size = (attr[flow_dim] || 100) - (padding + border) * 2,
 					full_size = (attr[full_dim] || 100) - (padding + border) * 2;
 
-				var num_specified = 0, total_specified_size = 0;
-
 				for (var k in attr.children) {
 					if (attr.children[k][flow_dim]) {
-						total_specified_size += attr.children[k][flow_dim] || 0;
+						var s = attr.children[k][flow_dim] || 0;
+
+						if (isPercentage(s))
+							s = my_size * parseFloat(s) / 100.0;
+
+						total_specified_size += s;
 						num_specified++;
 					}
 
 					num_children++;
 				}
 
-				var gap = attr.gap || 0,
+				var
 					avail_space = my_size - gap * (num_children - 1), // available space for all elements
 					position = padding, // current position for next element
 					size = 0;
@@ -56,7 +73,7 @@
 
 				delta.children = delta.children || {};
 
-				for (var k in attr.children)
+				for (k in attr.children)
 					delta.children[k] = delta.children[k] || {};
 
 				// TODO: Order matters
@@ -64,13 +81,22 @@
 					var child = attr.children[k],
 						delta_child = delta.children[k];
 
-					if (!child[flow_dim]) delta_child[flow_dim] = Math.max(size, MIN_SIZE);
-					if (!child[full_dim]) delta_child[full_dim] = full_size;
+					if (!(flow_dim in child)) delta_child[flow_dim] = Math.max(size, MIN_SIZE);
+					if (isPercentage(child[flow_dim])) delta_child[flow_dim] = my_size * parseFloat(child[flow_dim]) / 100.0;
+					if (!(full_dim in child)) delta_child[full_dim] = full_size;
 
 					delta_child[full_axis] = padding;
 					delta_child[flow_axis] = position;
-					position += gap + (child[flow_dim] || delta_child[flow_dim]);
+					position += gap + (delta_child[flow_dim] || child[flow_dim]);
 				}
+			}
+			function isPercentage(p) { return /^\d*\.?\d+%$/.test(p) }
+
+			function parsePercentage(p, attr) {
+				if ('height' in attr && 'width' in attr)
+					return (Math.min(attr.height, attr.width)) * parseFloat(p) / 100.0;
+				else
+					return (attr.height || attr.width || 100) * parseFloat(p) / 100.0;
 			}
 		]]>
 	</script>

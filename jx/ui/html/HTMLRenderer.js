@@ -13,16 +13,18 @@ export default function HTMLRenderer(app, dom) {
 }
 
 HTMLRenderer.prototype.onDirty = function(dirtylist) {
+	var renderlist = this.renderlist;
+
 	for (var uid in dirtylist) {
 		var attr = dirtylist[uid];
 
 		if (attr)
-			this.updateElement(uid, dirtylist[uid]);
+			this.updateElement(uid, dirtylist[uid], renderlist[uid]);
 
 		// TODO how to delete elements?
 	}
 
-	JXML.deepMerge(this.renderlist, dirtylist);
+	JXML.deepMerge(renderlist, dirtylist);
 
 	if ( ! this.root_dom ) {
 		var root = this.app;
@@ -37,52 +39,70 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 	}
 }
 
-HTMLRenderer.prototype.updateElement = function(uid, attr) {
+HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	var el = this.getElement(uid), style = el.style;
 
-	if ('x' in attr)
-		style.left = attr.x + 'px';
+	if ('x' in delta)
+		style.left = delta.x + 'px';
 
-	if ('y' in attr)
-		style.top = attr.y + 'px';
+	if ('y' in delta)
+		style.top = delta.y + 'px';
 
-	if ('width' in attr)
-		style.width = attr.width + 'px';
+	if ('width' in delta)
+		style.width = delta.width + 'px';
 
-	if ('height' in attr)
-		style.height = attr.height + 'px';
+	if ('height' in delta) {
+		style.height = delta.height + 'px';
 
-	if ('background' in attr)
-		style.background = attr.background;
+		if (attr && 'textValign' in attr && ! ('textValign' in delta) )
+			style.lineHeight = delta.height + 'px';
+	}
 
-	if ('cornerRadius' in attr)
-		style.borderRadius = attr.cornerRadius + 'px';
+	if ('background' in delta)
+		style.background = delta.background;
 
-	if ('borderColor' in attr)
-		style.borderColor = attr.borderColor;
+	if ('cornerRadius' in delta)
+		style.borderRadius = delta.cornerRadius + 'px';
 
-	if ('borderWidth' in attr) {
-		style.borderWidth = attr.borderWidth + 'px';
+	if ('borderColor' in delta)
+		style.borderColor = delta.borderColor;
+
+	if ('borderWidth' in delta) {
+		style.borderWidth = delta.borderWidth + 'px';
 		style.borderStyle = 'solid';
 	}
 
-	if ('text' in attr)
-		el.textContent = attr.text;
+	if ('text' in delta) {
+		style.whiteSpace = 'nowrap';
+		el.textContent = delta.text;
+	}
 
-	if ('textColor' in attr)
-		style.color= attr.textColor;
+	if ('textColor' in delta)
+		style.color= delta.textColor;
 
-	if ('fontFamily' in attr)
-		style.fontFamily = attr.fontFamily;
+	if ('textAlign' in delta)
+		style.textAlign= delta.textAlign;
 
-	if ('fontSize' in attr)
-		style.fontSize = attr.fontSize + 'px';
+	if ('lineHeight' in delta) {
+		style.lineHeight = delta.lineHeight;
+	}
 
-	if ('fontWeight' in attr)
-		style.fontWeight = attr.fontWeight;
+	if ('textValign' in delta) {
+		if (delta.textValign == 'center')
+			style.lineHeight = 'height' in delta? delta.height + 'px' : attr.height + 'px' || '';
+	}
+
+	if ('fontFamily' in delta)
+		style.fontFamily = delta.fontFamily;
+
+	if ('fontSize' in delta)
+		style.fontSize = delta.fontSize + 'px';
+
+	if ('fontWeight' in delta)
+		style.fontWeight = delta.fontWeight;
 
 	// TODO appendChild called more often than needed
-	for (var child_uid in attr.children) {
+	for (var child_uid in delta.children) {
 		var child_el = this.getElement(child_uid);
 
 		el.appendChild(child_el);

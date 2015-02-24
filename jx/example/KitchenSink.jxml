@@ -1,4 +1,4 @@
-<Panel xmlns="jx/ui" title="TheKitchenSink" borderWidth="15" width="600" height="500" >
+<Panel xmlns="jx/ui" title="TheKitchenSink" borderWidth="15" width="600" height="500" gap="5%">
 	<Label borderWidth="10" borderColor="blue" height="50">Label</Label>
 	<Label borderWidth="10" textColor="red" height="50" >Red Label</Label>
 	<FillText borderWidth="10" borderColor="grey" >FillText</FillText>
