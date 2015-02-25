@@ -2,7 +2,7 @@
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {
-				if (attr.text && attr.height && attr.width) {
+				if ('text' in attr && 'height' in attr && 'width' in attr) {
 					var ratio = estimate_ratio(attr.text);
 
 					if ( ratio <= (attr.width / attr.height) )
