@@ -14,6 +14,7 @@
 
 			// TODO: Such hack. Find a better way to do this!
 			function estimate_ratio(str) {
+				str += '';
 				return str.length * 0.5;
 			}
 		]]>
