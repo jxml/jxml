@@ -1,19 +1,19 @@
 import JXMLTemplate from 'jx/build/JXMLTemplate'
 
-export default JXML;
+export default JXMLCompiler;
 
-function JXML(name) {
+function JXMLCompiler(name) {
 	this.name = name.replace(/[^a-zA-Z_$]/g, '_');
 
 	// Default pipeline
 	this.pipeline = [];
 }
 
-JXML.prototype.setSource = function(source) {
+JXMLCompiler.prototype.setSource = function(source) {
 	this.source = source;
 }
 
-JXML.prototype.build = function() {
+JXMLCompiler.prototype.build = function() {
 	var build_assets = this.build_assets = {
 		source: this.source,
 		meta: {}
@@ -28,7 +28,7 @@ JXML.prototype.build = function() {
 	return build_assets;
 }
 
-JXML.prototype.parseXML = function(build_assets) {
+JXMLCompiler.prototype.parseXML = function(build_assets) {
 	var parser = new window.DOMParser(); // TODO: don't access globals like this
 
 	var dom = parser.parseFromString(build_assets.source, 'text/xml'), error
@@ -43,7 +43,7 @@ JXML.prototype.parseXML = function(build_assets) {
  * Identifies elements in template with IDs and builds a map
  * of IDs => path
  */
-JXML.prototype.extractIDs = function(build_assets) {
+JXMLCompiler.prototype.extractIDs = function(build_assets) {
 	var template = build_assets.template, IDs = {};
 
 	extractIDs(template);
@@ -70,7 +70,7 @@ JXML.prototype.extractIDs = function(build_assets) {
 /**
  * Removes <Doc> from the template and puts in meta
  */
-JXML.prototype.extractDocs = function(build_assets) {
+JXMLCompiler.prototype.extractDocs = function(build_assets) {
 	var template = build_assets.template,
 		children = template.children,
 		docs = [];
@@ -84,13 +84,14 @@ JXML.prototype.extractDocs = function(build_assets) {
 		}
 	}
 
+	console.log("DOCS: ", docs);
 	build_assets.meta.docs = docs;
 }
 
 /**
  * Removes <script> from the template and puts in init
  */
-JXML.prototype.extractScript = function(build_assets) {
+JXMLCompiler.prototype.extractScript = function(build_assets) {
 	var template = build_assets.template,
 		children = template.children,
 		script = extractScript(template);
@@ -160,7 +161,7 @@ JXML.prototype.extractScript = function(build_assets) {
 	}
 }
 
-JXML.prototype.generateJS = function(build_assets) {
+JXMLCompiler.prototype.generateJS = function(build_assets) {
 	var jsString = makeClass(
 		this.name,
 		function(jxmlcomponent) { this.jxmlcomponent = jxmlcomponent },
