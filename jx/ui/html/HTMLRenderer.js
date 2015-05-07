@@ -10,10 +10,21 @@ export default function HTMLRenderer(app, dom) {
 	this.root_dom = null;
 	this.elements = {};   // map of uid => dom elements
 	this.renderlist = {};
+	this.dirtylist = {};
 }
 
 HTMLRenderer.prototype.onDirty = function(dirtylist) {
+	JXML.deepMerge(this.dirtylist, dirtylist);
+
+	if (!this.timer) this.timer = setTimeout(this.flush.bind(this), 10);
+}
+
+HTMLRenderer.prototype.flush = function() {
 	var renderlist = this.renderlist;
+
+	this.timer = null;
+
+	var dirtylist = this.dirtylist;
 
 	for (var uid in dirtylist) {
 		var attr = dirtylist[uid];
@@ -25,6 +36,8 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 	}
 
 	JXML.deepMerge(renderlist, dirtylist);
+
+	this.dirtylist = {};
 
 	if ( ! this.root_dom ) {
 		var root = this.app;
