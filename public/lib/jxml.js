@@ -1,11 +1,11 @@
-import JXML from 'jx/build/JXML';
+import JXMLCompiler from 'jx/build/JXMLCompiler';
 
 export function translate(load) {
-	var jxml = new JXML(load.name);
+	var jxml_compiler = new JXMLCompiler(load.name);
 
-	jxml.setSource(load.source);
+	jxml_compiler.setSource(load.source);
 
-	var build_assets = jxml.build();
+	var build_assets = jxml_compiler.build();
 
 	return build_assets.jsString;
 }
