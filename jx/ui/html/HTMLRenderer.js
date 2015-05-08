@@ -114,6 +114,11 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	if ('fontWeight' in delta)
 		style.fontWeight = delta.fontWeight;
 
+	if ('onclick' in delta)
+		el.onclick = function() {
+			JXML.cast(delta.onclick[0], delta.onclick[1]);
+		};
+
 	// TODO appendChild called more often than needed
 	for (var child_uid in delta.children) {
 		var child_el = this.getElement(child_uid);

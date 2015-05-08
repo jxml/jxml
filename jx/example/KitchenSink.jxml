@@ -1,6 +1,12 @@
 <Panel xmlns="jx/ui" title="TheKitchenSink" borderWidth="15" width="600" height="500" gap="5%">
+	<script>
+		function onclick() { alert('hello!') }
+
+		button.setAttr({ onclick: [ this.jxmlcomponent.uid, 'onclick' ] });
+	</script>
 	<Label borderWidth="10" borderColor="blue" height="50">Label</Label>
 	<Label borderWidth="10" textColor="red" height="50" >Red Label</Label>
 	<FillText borderWidth="10" borderColor="grey" >FillText</FillText>
+	<Button id="button">Button</Button>
 	<Clock borderWidth="10" borderColor="orange"/>
 </Panel>

@@ -2,13 +2,16 @@ export default function JXML() {}
 
 import JXMLComponent from 'jx/ui/JXMLComponent';
 
-var components = {}; // God object
+var components = {}, // God object
+	casts        = [], // Deferred casts
+	cast_timer;        // Set if cast handling scheduled
 
 /**
  * Always use JXML.create to instantiate JXML components.
  */
 JXML.create = function(renderer, module, uid, attr) {
 	// TODO: allow module overwrites by different renderers
+	uid = uid || 'root';
 
 	var element = new JXMLComponent(renderer, module, uid, attr);
 
@@ -27,10 +30,23 @@ JXML.import = function(name, cb) {
  * `args` will be sanitized through JSON.
  */
 JXML.cast = function(uid, method, args) {
-	args = JSON.parse(JSON.stringify());
+	args = JSON.parse(JSON.stringify(args || {}));
 	method += '';
 
-	throw 'TODO: implement me!';
+	var component = components[uid];
+
+	if (component) {
+		casts.push([ component, method, args ]);
+		if (!cast_timer) cast_timer = setTimeout(handle_casts, 50);
+	}
+}
+
+function handle_casts() {
+	for (var i = 0; i < casts.length; i++)
+		casts[i][0].handle_cast(casts[i][1], casts[i][2]);
+
+	casts = [];
+	cast_timer = null;
 }
 
 /**

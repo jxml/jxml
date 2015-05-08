@@ -51,6 +51,9 @@
 			if ('fontWeight' in delta)
 				dirty.fontWeight = delta.fontWeight;
 
+			if ('onclick' in delta)
+				dirty.onclick = delta.onclick;
+
 			return dirty;
 		}
 
