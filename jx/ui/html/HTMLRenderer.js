@@ -116,7 +116,7 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 
 	if ('onclick' in delta)
 		el.onclick = function() {
-			JXML.cast(delta.onclick[0], delta.onclick[1]);
+			JXML.cast(delta.onclick[0], delta.onclick[1], delta.onclick[2]);
 		};
 
 	// TODO appendChild called more often than needed
