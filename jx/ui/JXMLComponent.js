@@ -9,7 +9,6 @@ import JXML from 'jx/JXML';
  * dispatched asynchronously.
  */
 export default function JXMLComponent(renderer, module, uid, attr) {
-	uid = uid || 'root';
 	this.renderer  = renderer;
 	this.uid       = uid;
 	this.module    = module;
@@ -199,6 +198,14 @@ JXMLComponent.prototype.onDirty = function(dirty) {
 
 	dirtylist[this.uid.replace(/:.*/, '')] = copy(dirty);
 	this.renderer.onDirty(dirtylist);
+}
+
+JXMLComponent.prototype.handle_cast = function(method, args) {
+	if (this.resolved)
+		this.resolved.handle_cast(method, args);
+
+	// TODO: handle the case where we get messages but can't
+	//       process them due to being unresolved
 }
 
 /**

@@ -119,6 +119,8 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 		if (typeof render != "undefined")
 		  this.render = render;
 
+		this.locals = {}; // map of local functions => reference
+
 		if (this.jxmlcomponent.root)
 			var setAttr = this.jxmlcomponent.root.setAttr.bind(this.jxmlcomponent.root);
 
@@ -149,6 +151,12 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 			.replace(/\$id\b/g, id)
 			.replace(/\$path\b/g, build_assets.IDs[id]);
 
+
+	var FUNCTION_REGEX = /function +([$A-Z_][0-9A-Z_$]*)/i;
+	script.replace(FUNCTION_REGEX, function(_, name) {
+		if (name) stub += 'this.locals.' + name + ' = ' + name + ';\n';
+	});
+
 	build_assets.script = stub + script;
 
 	function extractScript(node) {
@@ -167,9 +175,10 @@ JXMLCompiler.prototype.generateJS = function(build_assets) {
 		function(jxmlcomponent) { this.jxmlcomponent = jxmlcomponent },
 		null,
 		{
-			template: build_assets.template,
-			init:     new Function(build_assets.script),
-			IDs:      build_assets.IDs
+			template:    build_assets.template,
+			init:        new Function(build_assets.script),
+			IDs:         build_assets.IDs,
+			handle_cast: function(m, a) { this.locals[m] && this.locals[m].apply(this, a) }
 		}
 	);
 
