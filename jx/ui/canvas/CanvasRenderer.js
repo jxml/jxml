@@ -45,6 +45,8 @@ CanvasRenderer.prototype.paintElement = function(uid) {
 
 	if (!attr) return;
 
+	if (attr.visible === false) return;
+
 	ctx.save();
 	ctx.translate(attr.x | 0, attr.y | 0);
 

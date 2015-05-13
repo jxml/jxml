@@ -55,6 +55,9 @@ HTMLRenderer.prototype.flush = function() {
 HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	var el = this.getElement(uid), style = el.style;
 
+	if ('visible' in delta)
+		style.display = delta.visible ? 'block' : 'none';
+
 	if ('x' in delta)
 		style.left = delta.x + 'px';
 
@@ -113,6 +116,9 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 
 	if ('fontWeight' in delta)
 		style.fontWeight = delta.fontWeight;
+
+	if ('cursor' in delta)
+		style.cursor = delta.cursor;
 
 	if ('onclick' in delta)
 		el.onclick = function() {
