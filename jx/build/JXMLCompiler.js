@@ -79,12 +79,12 @@ JXMLCompiler.prototype.extractDocs = function(build_assets) {
 		var child = children[k];
 
 		if (/(^|\/)Doc$/.test(child.module)) {
+			child["component"] = this.name; // mark this documentation with source name
 			docs.push(child);
 			delete children[k];
 		}
 	}
 
-	console.log("DOCS: ", docs);
 	build_assets.meta.docs = docs;
 }
 
@@ -92,7 +92,8 @@ JXMLCompiler.prototype.extractDocs = function(build_assets) {
  * Removes <script> from the template and puts in init
  */
 JXMLCompiler.prototype.extractScript = function(build_assets) {
-	var template = build_assets.template,
+	var
+		template = build_assets.template,
 		children = template.children,
 		script = extractScript(template);
 
@@ -152,7 +153,7 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 			.replace(/\$path\b/g, build_assets.IDs[id]);
 
 
-	var FUNCTION_REGEX = /function +([$A-Z_][0-9A-Z_$]*)/i;
+	var FUNCTION_REGEX = /function +([$A-Z_][0-9A-Z_$]*)/gi;
 	script.replace(FUNCTION_REGEX, function(_, name) {
 		if (name) stub += 'this.locals.' + name + ' = ' + name + ';\n';
 	});
@@ -178,6 +179,7 @@ JXMLCompiler.prototype.generateJS = function(build_assets) {
 			template:    build_assets.template,
 			init:        new Function(build_assets.script),
 			IDs:         build_assets.IDs,
+			docs:        JSON.stringify(build_assets.meta.docs),
 			handle_cast: function(m, a) { this.locals[m] && this.locals[m].apply(this, [a]) }
 		}
 	);
