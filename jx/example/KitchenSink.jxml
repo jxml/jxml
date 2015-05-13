@@ -1,4 +1,9 @@
-<Panel xmlns="jx/ui" title="TheKitchenSink" borderWidth="15" width="600" height="500" gap="5%">
+<Panel xmlns="jx/ui" title="The KitchenSink" direction="vertical" borderColor="grey" borderWidth="2" width="600" height="500">
+	<Doc>
+		<![CDATA[
+			This is the Kitchen Sink. You can find all sorts of good stuff in here!
+		]]>
+	</Doc>
 	<script>
 		function onclick() { alert('hello!') }
 

@@ -1,4 +1,9 @@
 <Box xmlns="jx/ui">
+	<Doc>
+		<![CDATA[
+			I am a Panel. I am made of a Box with a FillText for my title.
+		]]>
+	</Doc>
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {
