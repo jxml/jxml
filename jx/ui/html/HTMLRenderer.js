@@ -64,6 +64,15 @@ HTMLRenderer.prototype.deleteElement = function(uid) {
 HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	var el = this.getElement(uid), style = el.style;
 
+	if ('' in delta) { // TODO yuck?
+		style.left = style.top = style.width = style.height =
+		style.display = style.background = style.color = style.cursor =
+		style.borderRadius = style.borderColor = style.borderWidth = style.borderStyle =
+		style.whiteSpace = style.textAlign= style.lineHeight =
+		style.fontFamily = style.fontSize = style.fontWeight =
+		el.textContent = el.onclick = null;
+	}
+
 	if ('visible' in delta)
 		style.display = delta.visible ? 'block' : 'none';
 
@@ -79,8 +88,14 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	if ('height' in delta) {
 		style.height = delta.height + 'px';
 
-		if (attr && 'textValign' in attr && ! ('textValign' in delta) )
-			style.lineHeight = delta.height + 'px';
+		if ( ! ('textValign' in delta) )
+
+		if (attr && 'textValign' in attr && ! ('textValign' in delta) ) {
+			if (attr.textValign == 'center')
+				style.lineHeight = delta.height + 'px';
+			else
+				style.lineHeight = null;
+		}
 	}
 
 	if ('background' in delta)
@@ -103,10 +118,10 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	}
 
 	if ('textColor' in delta)
-		style.color= delta.textColor;
+		style.color = delta.textColor;
 
 	if ('textAlign' in delta)
-		style.textAlign= delta.textAlign;
+		style.textAlign = delta.textAlign;
 
 	if ('lineHeight' in delta) {
 		style.lineHeight = delta.lineHeight;
