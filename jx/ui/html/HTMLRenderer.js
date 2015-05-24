@@ -22,20 +22,19 @@ HTMLRenderer.prototype.onDirty = function(dirtylist) {
 
 HTMLRenderer.prototype.flush = function() {
 	var renderlist = this.renderlist,
-		dirtylist = this.dirtylist;
+		dirtylist = this.dirtylist,
+		diff = JXML.mergeDiff(renderlist, dirtylist);
 
 	this.timer = null;
 
-	for (var uid in dirtylist) {
-		var delta = dirtylist[uid];
+	for (var uid in diff) {
+		var delta = diff[uid];
 
 		if (delta)
-			this.updateElement(uid, dirtylist[uid], renderlist[uid]);
+			this.updateElement(uid, diff[uid], renderlist[uid]);
 		else
 			this.deleteElement(uid); // TODO: element also deleted in updateElement()
 	}
-
-	JXML.deepMerge(renderlist, dirtylist);
 
 	this.dirtylist = {};
 

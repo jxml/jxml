@@ -57,6 +57,8 @@ JXMLComponent.prototype.resolve = function() {
 }
 
 JXMLComponent.prototype.show = function() {
+	if (this.visible) return;
+
 	this.visible = true;
 
 	if (!this.resolved)
@@ -135,6 +137,8 @@ JXMLComponent.prototype.setAttr = function(delta) {
 JXMLComponent.prototype.applyAttr = function(delta) {
 	if (this.root) { // component has internal structure
 		delta = JXML.mergeDiff(this.attr, delta);
+
+		if (!delta) return; // nothing changed
 
 		// Allow component to mangle attributes
 		if (this.resolved.onAttr && delta)
