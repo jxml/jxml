@@ -129,7 +129,7 @@ JXMLComponent.prototype.setAttr = function(delta) {
 	if (this.resolved)
 		this.applyAttr(delta);
 	else // component unresolved, save for later
-		JXML.deepMerge(this.unresolved_attr, delta);
+		JXML.diffMerge(this.unresolved_attr, delta);
 }
 
 JXMLComponent.prototype.applyAttr = function(delta) {
