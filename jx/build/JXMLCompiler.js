@@ -181,7 +181,7 @@ JXMLCompiler.prototype.generateJS = function(build_assets) {
 			init:        new Function(build_assets.script),
 			IDs:         build_assets.IDs,
 			docs:        JSON.stringify(build_assets.meta.docs),
-			handle_cast: function(m, a) { this.locals[m] && this.locals[m].apply(this, [a]) }
+			handle_cast: function(m, a) { this.locals[m] && this.locals[m].apply(this, a) }
 		}
 	);
 

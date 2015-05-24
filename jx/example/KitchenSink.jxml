@@ -35,7 +35,7 @@
 			function init() {
 				// Set onclick handler
 				for (var id in components) {
-					components[id].setAttr({ onclick: [ self.jxmlcomponent.uid, 'onclick', id ] });
+					components[id].setAttr({ onclick: [ self.jxmlcomponent.uid, 'onclick', [id] ] });
 				}
 
 				// Display Kitchen Sink Docs

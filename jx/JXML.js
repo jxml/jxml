@@ -37,13 +37,18 @@ JXML.import = function(name, cb) {
  * `args` will be sanitized through JSON.
  */
 JXML.cast = function(uid, method, args) {
-	args = JSON.parse(JSON.stringify(args || {}));
+	var array_args = [];
+
+	for (var i = 0; i in args; i++)
+		array_args.push(args[i]);
+
+	array_args = JSON.parse(JSON.stringify(array_args || {}));
 	method += '';
 
 	var component = components[uid];
 
 	if (component) {
-		casts.push([ component, method, args ]);
+		casts.push([ component, method, array_args ]);
 		if (!cast_timer) cast_timer = setTimeout(handle_casts, 50);
 	}
 }
