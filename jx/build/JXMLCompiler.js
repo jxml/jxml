@@ -145,6 +145,7 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 			this.children_node[this.key] = attr;
 			setAttr(this.path);
 		}
+
 	}).toString().replace(/^[^{]+{|}$/g, '');
 
 	for (var id in build_assets.IDs)
