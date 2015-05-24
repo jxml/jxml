@@ -37,6 +37,9 @@ CanvasRenderer.prototype.render = function(root_uid) {
 	this.paintElement(root_uid);
 }
 
+CanvasRendere.prototype.deleteElement(uid) {
+	// TODO: Implement me!
+}
 
 CanvasRenderer.prototype.paintElement = function(uid) {
 	var canvas = this.canvas,

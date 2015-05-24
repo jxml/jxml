@@ -20,6 +20,13 @@ JXML.create = function(renderer, module, uid, attr) {
 	return element;
 }
 
+JXML.destroy = function(uid) {
+	var element = components[uid];
+
+	if (element)
+		delete components[uid];
+}
+
 JXML.import = function(name, cb) {
 	if (!name) throw 'Module name required';
 	System.import(name + '.jxml!').then(cb);

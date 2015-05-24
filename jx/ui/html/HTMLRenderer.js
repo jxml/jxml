@@ -13,26 +13,26 @@ export default function HTMLRenderer(app, dom) {
 	this.dirtylist = {};
 }
 
+// renderlist and dirtylist are flat maps of uuid => attrs
 HTMLRenderer.prototype.onDirty = function(dirtylist) {
-	JXML.deepMerge(this.dirtylist, dirtylist);
+	JXML.diffMerge(this.dirtylist, dirtylist, true);
 
 	if (!this.timer) this.timer = setTimeout(this.flush.bind(this), 10);
 }
 
 HTMLRenderer.prototype.flush = function() {
-	var renderlist = this.renderlist;
+	var renderlist = this.renderlist,
+		dirtylist = this.dirtylist;
 
 	this.timer = null;
 
-	var dirtylist = this.dirtylist;
-
 	for (var uid in dirtylist) {
-		var attr = dirtylist[uid];
+		var delta = dirtylist[uid];
 
-		if (attr)
+		if (delta)
 			this.updateElement(uid, dirtylist[uid], renderlist[uid]);
-
-		// TODO how to delete elements?
+		else
+			this.deleteElement(uid); // TODO: element also deleted in updateElement()
 	}
 
 	JXML.deepMerge(renderlist, dirtylist);
@@ -50,6 +50,16 @@ HTMLRenderer.prototype.flush = function() {
 		if (this.root_dom)
 			this.parent_dom.appendChild(this.root_dom);
 	}
+}
+
+HTMLRenderer.prototype.deleteElement = function(uid) {
+	var el = this.elements[uid];
+
+	if (!el) return;
+
+	el.parentNode && el.parentNode.removeChild(el);
+	delete this.renderlist[uid];
+	delete this.elements[uid];
 }
 
 HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
@@ -127,9 +137,15 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in delta.children) {
-		var child_el = this.getElement(child_uid);
+		var child_existence = delta.children[child_uid];
 
-		el.appendChild(child_el);
+		if (delta.children[child_uid]) {
+			var child_el = this.getElement(child_uid);
+
+			el.appendChild(child_el);
+		}
+		else
+			this.deleteElement(uid); // TODO: element also deleted in flush()
 	}
 }
 
