@@ -227,7 +227,7 @@ JXMLComponent.prototype.handle_cast = function(method, args) {
  * Makes a deep JSON-serializable no-reference copy of given object
  */
 function copy(obj) {
-	return JSON.parse(JSON.stringify(obj || {}));
+	return JSON.parse(JSON.stringify(obj));
 }
 
 /**
