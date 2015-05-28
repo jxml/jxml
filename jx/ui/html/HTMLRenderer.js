@@ -53,7 +53,7 @@ HTMLRenderer.prototype.flush = function() {
 }
 
 HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
-	var el = this.getElement(uid), style = el.style;
+	var el = this.getElement(uid, delta && delta.tagName), style = el.style;
 
 	if ('x' in delta)
 		style.left = delta.x + 'px';
@@ -121,15 +121,16 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 
 	// TODO appendChild called more often than needed
 	for (var child_uid in delta.children) {
-		var child_el = this.getElement(child_uid);
+		var child_el = this.getElement(child_uid, delta.children[child_uid].tagName);
 
 		el.appendChild(child_el);
 	}
 }
 
 HTMLRenderer.prototype.getElement = function(uid, tag) {
-	if (uid in this.elements)
+	if (uid in this.elements && !tag) {  // normal element gettting
 		return this.elements[uid];
+	}
 
 	var el = document.createElement(tag || 'div'),
 		style = el.style;
@@ -137,6 +138,13 @@ HTMLRenderer.prototype.getElement = function(uid, tag) {
 	el.id = 'jx:' + uid;
 	style.position = 'absolute';
 	style.boxSizing = 'border-box';
+
+	if (uid in this.elements && tag) {  // if element is already created and tagName need to changed
+		var old_elm = this.elements[uid];
+		old_elm.parentNode.insertBefore(el, old_elm);
+		old_elm.parentNode.removeChild(old_elm);
+	}
+
 	this.elements[uid] = el;
 
 	return el;

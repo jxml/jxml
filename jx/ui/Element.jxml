@@ -3,6 +3,9 @@
 		function render(delta, attr) {
 			var dirty = {};
 
+			if ('tagName' in delta)
+				dirty.tagName = delta.tagName;
+
 			if ('x' in delta)
 				dirty.x = delta.x;
 
