@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<!-- This is a live editor for JXML Applications / Modules / Components -->
+	<head>
+		<script src="lib/system.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.js"></script>
+		<style type="text/css" media="screen">
+			#editor {
+				position: absolute;
+				top: 0;
+				right: 50%;
+				bottom: 0;
+				left: 0;
+			}
+			#preview {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 50%;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="editor"></div>
+		<div id="preview"></div>
+		<script>
+			var editor = ace.edit("editor");
+
+			editor.setTheme("ace/theme/monokai");
+			//editor.setTheme("ace/theme/vibrant_ink");
+			editor.getSession().setMode("ace/mode/html");
+
+			var request = new XMLHttpRequest();
+
+			System.config({
+				baseURL: 'lib'
+		 });
+
+			var app, params = {
+				app: 'jx/example/KitchenSink',
+				renderer: 'jx/ui/html/HTMLRenderer'
+			};
+
+			location.search.replace(/\??(([^=]*)=)?([^&]+)&?/g, function(_, _, k, v) {
+				params[k || 'app'] = v;
+			});
+
+			request.open('GET', 'lib/' + params.app + '.jxml', false);
+			request.send(null);
+			editor.setValue(request.responseText);
+			editor.clearSelection();
+
+			var PREVIEW_NAME = 'render-live';
+
+			Promise.all([
+				System.import('jxml'),
+				System.import(params.renderer)
+			]).then(function(modules) {
+				var jxml = modules[0],
+					Renderer = modules[1].default,
+					dom = document.getElementById('preview');
+
+				render();
+
+				var timer;
+
+				editor.getSession().on('change', function(e) {
+					clearTimeout(timer);
+					timer = setTimeout(render, 200);
+				});
+
+				function render() {
+					var module_name = PREVIEW_NAME + '.jxml!jxml';
+
+					System.delete(module_name);
+
+					// TODO: hack to delete cached module declaration
+					delete System._loader.moduleRecords[module_name];
+
+					var contents = editor.getValue();
+
+					jxml.updateLive(PREVIEW_NAME + '.jxml', contents);
+
+					while (dom.lastChild)
+						dom.removeChild(dom.lastChild);
+
+					renderer = new Renderer(PREVIEW_NAME, dom);
+
+					app = renderer.app;
+					app.show();
+					setLayout();
+				}
+			});
+
+			function setLayout() {
+				app && app.setAttr({
+					x: 0,
+					y: 0,
+					width: innerWidth / 2,
+					height: innerHeight
+				});
+			}
+
+			window.onresize = setLayout;
+		</script>
+	</body>
+</html>
