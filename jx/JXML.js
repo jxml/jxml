@@ -37,6 +37,9 @@ JXML.import = function(name, cb) {
  * `args` will be sanitized through JSON.
  */
 JXML.cast = function(uid, method, args) {
+	// args is an object (e.g. { 1: 'onclick', 2: 42 }) due to having
+	// passed through setAttr
+
 	var array_args = [];
 
 	for (var i = 0; i in args; i++)
