@@ -37,13 +37,14 @@ CanvasRenderer.prototype.render = function(root_uid) {
 	this.paintElement(root_uid);
 }
 
-
 CanvasRenderer.prototype.paintElement = function(uid) {
 	var canvas = this.canvas,
 		ctx = this.ctx,
 		attr = this.renderlist[uid];
 
 	if (!attr) return;
+
+	if (attr.visible === false) return;
 
 	ctx.save();
 	ctx.translate(attr.x | 0, attr.y | 0);

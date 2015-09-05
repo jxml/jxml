@@ -1,2 +1,7 @@
 <Element xmlns="jx/ui">
+	<Doc>
+		<![CDATA[
+			I am a Label. I accept and display text!
+		]]>
+	</Doc>
 </Element>

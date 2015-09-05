@@ -3,6 +3,9 @@
 		function render(delta, attr) {
 			var dirty = {};
 
+			if ('visible' in delta)
+				dirty.visible = delta.visible;
+
 			if ('x' in delta)
 				dirty.x = delta.x;
 
@@ -51,8 +54,12 @@
 			if ('fontWeight' in delta)
 				dirty.fontWeight = delta.fontWeight;
 
-			if ('onclick' in delta)
+			if ('cursor' in delta)
+				dirty.cursor = delta.cursor;
+
+			if ('onclick' in delta){
 				dirty.onclick = delta.onclick;
+			}
 
 			return dirty;
 		}

@@ -1,4 +1,9 @@
 <Label xmlns="jx/ui">
+	<Doc>
+		<![CDATA[
+			I am a FillText. I dynamically resize text to fit within myself.
+		]]>
+	</Doc>
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {
