@@ -16,7 +16,7 @@
 					'Button':   button_link,
 					'Box':      box_link,
 					'Panel':    panel_link,
-					'Filltext': filltext_link,
+					'FillText': filltext_link,
 					'Clock':    clock_link
 				};
 
