@@ -1,4 +1,9 @@
 <Element xmlns="jx/ui">
+	<Doc>
+		<![CDATA[
+			I am a Box. I automagically lay out inner components.
+		]]>
+	</Doc>
 	<script>
 		<![CDATA[
 			function onAttr(attr, delta) {

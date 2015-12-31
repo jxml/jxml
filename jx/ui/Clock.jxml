@@ -1,4 +1,9 @@
 <Element xmlns="jx/ui" width="100" height="100">
+	<Doc>
+		<![CDATA[
+			I am a Clock. I display the current time!
+		]]>
+	</Doc>
 	<script>
 		<![CDATA[
 			function pad(n) { return ('0' + n).slice(-2) }

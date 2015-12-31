@@ -57,6 +57,8 @@ JXMLComponent.prototype.resolve = function() {
 }
 
 JXMLComponent.prototype.show = function() {
+	if (this.visible) return;
+
 	this.visible = true;
 
 	if (!this.resolved)
@@ -70,15 +72,24 @@ JXMLComponent.prototype.create = function(module, attr, child_key) {
 
 	var uid;
 
-	if (child_key)
+	if (child_key) // Creating a child component
 		uid = this.uid.replace(/:.*/, '') + ' ' + child_key;
-	else
+	else // Creating the superclass component
 		uid = this.uid + ':' + module;
 
 	// TODO: allow module overwrites
 	var element = JXML.create(this.renderer, module, uid, attr);
 
 	return element;
+}
+
+JXMLComponent.prototype.destroy = function() {
+	var children = this.children, k;
+
+	for (k in children)
+		children[k].destroy();
+
+	this.onDirty(null);
 }
 
 /**
@@ -120,12 +131,14 @@ JXMLComponent.prototype.setAttr = function(delta) {
 	if (this.resolved)
 		this.applyAttr(delta);
 	else // component unresolved, save for later
-		JXML.deepMerge(this.unresolved_attr, delta);
+		JXML.diffMerge(this.unresolved_attr, delta);
 }
 
 JXMLComponent.prototype.applyAttr = function(delta) {
 	if (this.root) { // component has internal structure
 		delta = JXML.mergeDiff(this.attr, delta);
+
+		if (!delta) return; // nothing changed
 
 		// Allow component to mangle attributes
 		if (this.resolved.onAttr && delta)
@@ -168,26 +181,28 @@ JXMLComponent.prototype.applyChildrenAttr = function(delta_children) {
 		dirty;
 
 	for (var k in delta_children) {
-		var child = delta_children[k];
+		var
+			child = delta_children[k],
+			child_uid = this.uid.replace(/:.*/, '') + ' ' + k;
 
 		if (!child) { // child is being removed
 			if (children[k]) {
 				// signal child for great destruction
-				this.children[k].destroy();
+				children[k].destroy();
 				delete this.children[k];
-				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = null;
+				dirty_children[child_uid] = null;
+				dirty = true;
 			}
 		}
 		else { // child is being added or modified
 			if (children[k]) // modification
 				children[k].setAttr(child);
-			else {// creation
+			else { // creation
 				children[k] = this.create(child.module, child, k);
-				dirty_children[this.uid.replace(/:.*/, '') + ' ' + k] = true;
+				dirty_children[child_uid] = true;
+				dirty = true;
 			}
 		}
-
-		dirty = true;
 	}
 
 	return dirty && dirty_children;
@@ -212,7 +227,7 @@ JXMLComponent.prototype.handle_cast = function(method, args) {
  * Makes a deep JSON-serializable no-reference copy of given object
  */
 function copy(obj) {
-	return JSON.parse(JSON.stringify(obj || {}));
+	return JSON.parse(JSON.stringify(obj));
 }
 
 /**

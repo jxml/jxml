@@ -1,2 +1,11 @@
-<Element xmlns="jx/ui" width="100" height="100">
+<Element xmlns="jx/ui" width="100" height="100" borderWidth="1" textValign="center" cornerRadius="4" cursor="pointer">
+	<Doc>
+		<![CDATA[
+			I am a button. I accept mouse clicks!
+		]]>
+	</Doc>
+	<script>
+		<![CDATA[
+		]]>
+	</script>
 </Element>

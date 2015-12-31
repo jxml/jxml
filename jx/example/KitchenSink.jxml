@@ -1,12 +1,65 @@
-<Panel xmlns="jx/ui" title="TheKitchenSink" borderWidth="15" width="600" height="500" gap="5%">
+<Panel xmlns="jx/ui" title="The KitchenSink" direction="vertical" borderColor="grey" borderWidth="2" width="600" height="500">
+	<Doc>
+		<![CDATA[
+			This is the Kitchen Sink. You can find all sorts of good stuff in here!
+		]]>
+	</Doc>
 	<script>
-		function onclick() { alert('hello!') }
+		<![CDATA[
+			var
+				self = this,
+				selected,
 
-		button.setAttr({ onclick: [ this.jxmlcomponent.uid, 'onclick' ] });
+				components = {
+					'Element':  element_link,
+					'Label':    label_link,
+					'Button':   button_link,
+					'Box':      box_link,
+					'Panel':    panel_link,
+					'FillText': filltext_link,
+					'Clock':    clock_link
+				};
+
+			function displayDoc() {
+				var docs = JSON.parse(self.jxmlcomponent.resolved.docs)[0];
+
+				doc_header.setAttr({ text: docs.component });
+				doc_text.setAttr({ text: docs.text });
+			}
+
+			function onclick(target) {
+				col2.setAttr({ children: { selected: null} });
+				col2.setAttr({ children: { selected: { module: 'jx/ui/' + target, visible: 'true' } } });
+			}
+
+			function init() {
+				// Set onclick handler
+				for (var id in components) {
+					components[id].setAttr({ onclick: [ self.jxmlcomponent.uid, 'onclick', [id] ] });
+				}
+
+				// Display Kitchen Sink Docs
+				displayDoc();
+			}
+
+			init();
+		]]>
 	</script>
-	<Label borderWidth="10" borderColor="blue" height="50">Label</Label>
-	<Label borderWidth="10" textColor="red" height="50" >Red Label</Label>
-	<FillText borderWidth="10" borderColor="grey" >FillText</FillText>
-	<Button id="button">Button</Button>
-	<Clock borderWidth="10" borderColor="orange"/>
+	<Box id="container" direction="horizontal">
+		<Panel id="col1" title="Components" borderWidth="1" borderColor="grey" width="20%" gap="5%" padding="2%">
+			<Button id="element_link" textAlign="center" height="30">Element</Button>
+			<Button id="label_link" textAlign="center" height="30">Label</Button>
+			<Button id="button_link" textAlign="center" height="30">Button</Button>
+			<Button id="box_link" textAlign="center" height="30">Box</Button>
+			<Button id="panel_link" textAlign="center" height="30">Panel</Button>
+			<Button id="filltext_link" textAlign="center" height="30">FillText</Button>
+			<Button id="clock_link" textAlign="center" height="30">Clock</Button>
+		</Panel>
+		<Box id="col2" borderWidth="1" borderColor="grey" padding="15%" gap="5%">
+		</Box>
+		<Panel id="col3" title="Description" direction="vertical" borderWidth="1" borderColor="grey" width="30%" gap="5%" padding="2%">
+			<Label id="doc_header" textAlign="center" height="30" fontSize="16"></Label>
+			<Label id="doc_text" textAlign="center" height="180" fontSize="12"></Label>
+		</Panel>
+	</Box>
 </Panel>
