@@ -8,6 +8,7 @@ export default function CanvasRenderer(app, canvas) {
 	this.canvas = canvas || document.body.appendChild(document.createElement('canvas'));
 	this.ctx = this.canvas.getContext('2d');
 	this.renderlist = {};
+	this.timer = null;
 }
 
 CanvasRenderer.prototype.onDirty = function(dirtylist) {
@@ -21,6 +22,14 @@ CanvasRenderer.prototype.onDirty = function(dirtylist) {
 
 		this.root_uid = root.uid.replace(/:.*/, '');
 	}
+
+	if (this.timer) return;
+
+	this.timer = requestAnimationFrame(this.flush.bind(this));
+}
+
+CanvasRenderer.prototype.flush = function() {
+	this.timer = null;
 
 	if (this.root_uid) {
 		var render_root = this.renderlist[this.root_uid];
