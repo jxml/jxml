@@ -140,6 +140,14 @@ JXMLComponent.prototype.applyAttr = function(delta) {
 
 		if (!delta) return; // nothing changed
 
+		// Expand braces TODO: optimize
+		if (this.resolved.expandBraces) {
+			var brace_delta = this.resolved.expandBraces(this.attr);
+
+			brace_delta = JXML.mergeDiff(this.attr, brace_delta);
+			JXML.deepMerge(delta, brace_delta);
+		}
+
 		// Allow component to mangle attributes
 		if (this.resolved.onAttr && delta)
 			this.resolved.onAttr(this.attr, delta);

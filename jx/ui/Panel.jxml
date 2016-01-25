@@ -4,15 +4,9 @@
 			I am a Panel. I am made of a Box with a FillText for my title.
 		]]>
 	</Doc>
-	<script>
-		<![CDATA[
-			function onAttr(attr, delta) {
-				if ('title' in delta)
-					title.setAttr({ text: delta.title });
-			}
-		]]>
-	</script>
 	<Box height="50" background="#555" padding="10">
-		<FillText id="title" textAlign="center" textColor="white" fontFamily="DIN Next LT Pro" fontWeight="lighter">Panel</FillText>
+		<FillText id="title" textAlign="center" textColor="white" fontFamily="DIN Next LT Pro" fontWeight="lighter">
+			{{ attr.title }}
+		</FillText>
 	</Box>
 </Box>

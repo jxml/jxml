@@ -23,6 +23,7 @@ JXMLCompiler.prototype.build = function() {
 	this.extractIDs(build_assets);
 	this.extractDocs(build_assets);
 	this.extractScript(build_assets);
+	this.expandBraces(build_assets);
 	this.generateJS(build_assets);
 
 	return build_assets;
@@ -168,6 +169,57 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 			return node.text;
 
 		return script;
+	}
+}
+
+JXMLCompiler.prototype.expandBraces = function(build_assets) {
+	var delta = {}, expanded;
+
+	visit(build_assets.template, function(path, node) {
+		var d;
+
+		for (var k in node) {
+			if (k == 'children') continue;
+
+			if (/{{[^}]*}}/.test(node[k])) {
+				expanded = true;
+
+				if (!d) {
+					d = delta;
+
+					for (var i = 0; i < path.length; i++) {
+						d = d.children = d.children || {};
+						d = d[path[i]] = d[path[i]] || {};
+					}
+				}
+
+				var code = node[k];
+
+				d[k] = code;
+
+				delete node[k];
+			}
+		}
+	});
+
+	if (!expanded) return;
+
+	build_assets.braces = delta;
+
+	// TODO Parse JS properly
+	var code = JSON.stringify(delta).replace(/"\s*{{|}}\s*"/g, '');
+
+	build_assets.script += ';\n' +
+		'this.expandBraces = function(attr) { return ' + code + ' }';
+
+	function visit(node, cb, path) {
+		if (!node) return;
+
+		path = path || [];
+		cb(path, node);
+
+		for (var k in node.children)
+			visit(node.children[k], cb, path.concat(k));
 	}
 }
 
