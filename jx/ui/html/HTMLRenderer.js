@@ -159,7 +159,7 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 			el.appendChild(child_el);
 		}
 		else
-			this.deleteElement(uid); // TODO: element also deleted in flush()
+			this.deleteElement(child_uid); // TODO: element also deleted in flush()
 	}
 }
 
