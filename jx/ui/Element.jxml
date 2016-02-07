@@ -57,9 +57,11 @@
 			if ('cursor' in delta)
 				dirty.cursor = delta.cursor;
 
-			if ('onclick' in delta){
+			if ('overflow' in delta)
+				dirty.overflow = delta.overflow;
+
+			if ('onclick' in delta)
 				dirty.onclick = delta.onclick;
-			}
 
 			return dirty;
 		}

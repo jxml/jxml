@@ -1,0 +1,58 @@
+<Element xmlns="jx/ui" overflow="scroll">
+	<Doc>
+		<![CDATA[
+			List component that creates children by spawning one component per key in attr.data.
+
+			A renderer must be specified as a child of the List component. The renderer component
+			will have its `data` attribute set to the value.
+		]]>
+		<Example>
+			<List data="{{ { moo: { text: { 'moo' }, cow: { text: { 'cow' } } }}">
+				<Label />
+			</List>
+		</Example>
+	</Doc>
+	<script><![CDATA[
+		var self = this, max = 0;
+
+		function onAttr(attr, delta) {
+			if ('data' in delta) {
+				var template = attr.children[Object.keys(attr.children)[0]],
+					children = {}, defrag;
+
+				for (var k in delta.data) {
+					var child = delta.data[k];
+
+					if (!child) {
+						children[k] = null;
+						defrag = true;
+						continue;
+					}
+
+					for (var a in template)
+						child[a] = template[a];
+
+					child.visible = true;
+					child.x = 0;
+					child.y = max;
+					max += attr.rowheight || 10;
+					child.width = attr.width;
+					child.height = attr.rowheight;
+					children[k] = child;
+				}
+
+				delta.children = children;
+
+				if (defrag) {
+					max = 0;
+
+					for (var k in attr.data) {
+						delta.children[k] = delta.children[k] || {};
+						delta.children[k].y = max;
+						max += attr.rowheight || 10;
+					}
+				}
+			}
+		}
+	]]></script>
+</Element>

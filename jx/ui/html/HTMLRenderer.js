@@ -144,6 +144,9 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	if ('cursor' in delta)
 		style.cursor = delta.cursor;
 
+	if ('overflow' in delta)
+		style.overflow = delta.overflow;
+
 	if ('onclick' in delta)
 		el.onclick = function() {
 			JXML.cast(delta.onclick[0], delta.onclick[1], delta.onclick[2]);
