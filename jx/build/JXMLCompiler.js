@@ -154,8 +154,8 @@ JXMLCompiler.prototype.extractScript = function(build_assets) {
 			.replace(/\$id\b/g, id)
 			.replace(/\$path\b/g, build_assets.IDs[id]);
 
-
 	var FUNCTION_REGEX = /function +([$A-Z_][0-9A-Z_$]*)/gi;
+
 	script.replace(FUNCTION_REGEX, function(_, name) {
 		if (name) stub += 'this.locals.' + name + ' = ' + name + ';\n';
 	});
@@ -181,7 +181,7 @@ JXMLCompiler.prototype.expandBraces = function(build_assets) {
 		for (var k in node) {
 			if (k == 'children') continue;
 
-			if (/{{[^}]*}}/.test(node[k])) {
+			if (/^\s*\{\{.*\}\}\s*$/.test(node[k])) {
 				expanded = true;
 
 				if (!d) {
@@ -207,7 +207,7 @@ JXMLCompiler.prototype.expandBraces = function(build_assets) {
 	build_assets.braces = delta;
 
 	// TODO Parse JS properly
-	var code = JSON.stringify(delta).replace(/"\s*{{|}}\s*"/g, '');
+	var code = JSON.stringify(delta).replace(/"\s*\{\{|\}\}\s*"/g, '');
 
 	build_assets.script += ';\n' +
 		'this.expandBraces = function(attr) { return ' + code + ' }';
@@ -319,7 +319,7 @@ function makeClass(name, constructor, superclass, prototype) {
 }
 
 /**
- * Converts an prototype to a JavaScript string that would
+ * Converts a prototype to a JavaScript string that would
  * recreate the prototype if passed to Object.create
  *
  * > toObjectPrototypeProperties({ moo: function() { return 42 }, cow: 42 })
