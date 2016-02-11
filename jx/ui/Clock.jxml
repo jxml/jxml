@@ -1,7 +1,7 @@
 <Element xmlns="jx/ui" width="100" height="100">
 	<Doc>
 		<![CDATA[
-			I am a Clock. I display the current time!
+			A clock displaying the current time
 		]]>
 	</Doc>
 	<script>

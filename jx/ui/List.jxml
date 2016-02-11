@@ -7,8 +7,8 @@
 			will have its `data` attribute set to the value.
 		]]>
 		<Example>
-			<List data="{{ { moo: { text: { 'moo' }, cow: { text: { 'cow' } } }}">
-				<Label />
+			<List data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">
+				<Label text="cow" />
 			</List>
 		</Example>
 	</Doc>
@@ -17,6 +17,10 @@
 
 		function onAttr(attr, delta) {
 			if ('data' in delta) {
+				// TODO: hack to allow JSON data in examples
+				if (typeof delta.data == 'string' && /^\s*\{\{.*\}\}\s*$/.test(delta.data))
+					delta.data = JSON.parse(delta.data.replace(/^\s*\{\{|\}\}\s*$/g, '').replace(/'/g, '"'));
+
 				var template = attr.children[Object.keys(attr.children)[0]],
 					children = {}, defrag;
 
