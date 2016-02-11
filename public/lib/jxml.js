@@ -24,7 +24,19 @@ export function translate(load) {
 	else
 		jxml_compiler.setSource(load.source);
 
-	var build_assets = jxml_compiler.build();
+	try {
+		var build_assets = jxml_compiler.build();
+	}
+	catch(e) {
+		console.log('Build error:', load.name, e);
+
+		var msg = e;
+
+		if (e.textContent)
+			msg = 'Error: ' + e.textContent;
+
+		return 'export default function BuildError() {} BuildError.prototype.render = function() { return { text: ' + JSON.stringify(load.name + ' - ' + msg) + ' } }';
+	}
 
 	return build_assets.jsString;
 }
