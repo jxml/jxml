@@ -15,7 +15,8 @@
 					'Panel':    panel_link,
 					'FillText': filltext_link,
 					'Clock':    clock_link,
-					'List':     list_link
+					'List':     list_link,
+					'VList':    vlist_link
 				};
 
 			function onclick(target) {
@@ -44,6 +45,7 @@
 			<Button id="filltext_link" textAlign="center" height="30">FillText</Button>
 			<Button id="clock_link" textAlign="center" height="30">Clock</Button>
 			<Button id="list_link" textAlign="center" height="30">List</Button>
+			<Button id="vlist_link" textAlign="center" height="30">VList</Button>
 		</Panel>
 		<example:Examples id="examples" component="jx/example/KitchenSink"/>
 	</Box>

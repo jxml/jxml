@@ -1,0 +1,227 @@
+<Element xmlns="jx/ui" overflow="scroll">
+	<Doc>
+		<![CDATA[
+			A List component that scales by doing virtual rendering.
+
+			A renderer must be specified as a child of the List component. The renderer component
+			will have its `data` attribute set to the value.
+		]]>
+		<Example>
+			<VList data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">
+				<Label/>
+			</VList>
+		</Example>
+	</Doc>
+	<script><![CDATA[
+		var template,     // row renderer
+			keys = [];      // primary keys of rows
+
+		// TODO: dynamically calculate number of rows to render
+		var RENDER_ROWS = 300;
+
+		var height = 20;
+
+		// TODO: native callback specification
+		setAttr({ onscroll: [ this.jxmlcomponent.uid, 'onscroll', [] ] });
+
+		var elements = [], // circular buffer of rendering elements,
+			 el_index = 0;   // index into circular buffer
+
+		function create_renderers() {
+			if (!template) return;
+
+			var children_delta = {};
+
+			for (var i = 0; i < elements.length; i++)
+				children_delta[elements[i].id] = null;
+
+			setAttr({ children: children_delta });
+
+			children_delta = {};
+			elements = [];
+
+			var render_rows = Math.min(keys.length, RENDER_ROWS);
+
+			for (var i = 0; i < render_rows; i++) {
+				var row = new Row(i);
+
+				elements.push(row);
+
+				var delta = row.setIndex(i);
+
+				for (var a in template)
+					delta[a] = template[a];
+
+				delta.visible = true;
+				delta.x = 10;
+				delta.width = attr.width - 20;
+				delta.height = attr.rowheight || 20;
+				children_delta[row.id] = delta;
+			}
+
+			setAttr({ children: children_delta });
+		}
+
+		// TODO: this class seems small and not very useful
+		function Row(i) {
+			this.id = 'row_' + i;
+		}
+
+		Row.prototype.setIndex = function(i) {
+			this.i = i;
+
+			return { y: i * height };
+		};
+
+		var timer;
+
+		function onscroll(s) {
+			bias = s - scroll_top;
+
+			if (bias > RENDER_ROWS)  bias = RENDER_ROWS;
+			if (bias < -RENDER_ROWS) bias = -RENDER_ROWS;
+			scroll_top = s;
+
+			if (!timer)
+				timer = requestAnimationFrame(render);
+		}
+
+		var top_row = 0,   // currently rendered first row index
+			scroll_top = 0,  // current scroll position
+			bias = 0,        // (over-)compensate for scrolling momentum
+			last_target_top_row = 0,
+			last_bias = 0;
+
+		function render() {
+			timer = null;
+
+			var target_top_row = Math.floor(scroll_top / height - 120);
+
+			bias = target_top_row - last_target_top_row;
+
+			if (Math.abs(bias - last_bias) > RENDER_ROWS)
+				bias = 0;
+
+			last_target_top_row = target_top_row;
+			target_top_row += Math.floor(bias * 0.5);
+			last_bias = bias;
+
+			target_top_row = Math.min(target_top_row, keys.length - RENDER_ROWS);
+			target_top_row = Math.max(target_top_row, 0);
+
+			var rows_to_move = target_top_row - top_row,
+				move_down = rows_to_move > 0;
+
+			rows_to_move = Math.abs(rows_to_move);
+
+			var work = 0;
+
+			if (rows_to_move > 0) {
+				var data = attr.data, children_delta = {}, e, i, child_data;
+
+				if (move_down) {
+					// move rows above to below
+					if (rows_to_move > RENDER_ROWS) {
+						top_row = target_top_row - RENDER_ROWS;
+						rows_to_move = RENDER_ROWS;
+					}
+
+					for (; rows_to_move > 0; rows_to_move--) {
+						e = elements[el_index];
+
+						i = top_row + RENDER_ROWS;
+						children_delta[e.id] = e.setIndex(i);
+
+						child_data = data[keys[i]];
+
+						for (var k in child_data)
+							children_delta[e.id][k] = child_data[k];
+
+						top_row++;
+						el_index++;
+
+						if (el_index >= RENDER_ROWS) el_index -= RENDER_ROWS;
+
+						work++;
+					}
+				}
+				else {
+					if (rows_to_move > RENDER_ROWS) {
+						top_row = target_top_row + RENDER_ROWS;
+						rows_to_move = RENDER_ROWS;
+					}
+
+					for (; rows_to_move > 0; rows_to_move--) {
+						// move rows below to above
+						top_row--;
+						el_index--;
+						if (el_index < 0) el_index += RENDER_ROWS;
+
+						e = elements[el_index];
+
+						i = top_row;
+						children_delta[e.id] = e.setIndex(i);
+
+						child_data = data[keys[i]];
+
+						for (var k in child_data)
+							children_delta[e.id][k] = child_data[k];
+
+						work++;
+					}
+				}
+
+				setAttr({ children: children_delta });
+			}
+		}
+
+		var refresh_timer;
+
+		function refresh() {
+			var data = attr.data;
+
+			keys = Object.keys(data).sort();
+			max.setAttr({ y: keys.length * height });
+
+			var render_rows = Math.min(keys.length, RENDER_ROWS);
+
+			if (elements.length != render_rows)
+				create_renderers();
+
+			refresh_timer = null;
+
+			var children_delta = {};
+
+			for (var i = 0; i < elements.length; i++) {
+				var el = elements[i];
+
+				children_delta[el.id] = data[keys[el.i]];;
+			}
+
+			setAttr({ children: children_delta });
+		}
+
+		function onAttr(attr, delta) {
+			if ('children' in delta) {
+				var t = delta.children[Object.keys(delta.children)[0]];
+
+				if (t) {
+					template = t;
+					create_renderers();
+				}
+
+				delete delta.children;
+			}
+
+			if ('data' in delta) {
+				// TODO: hack to allow JSON data in examples
+				if (typeof delta.data == 'string' && /^\s*\{\{.*\}\}\s*$/.test(delta.data))
+					attr.data = delta.data = JSON.parse(delta.data.replace(/^\s*\{\{|\}\}\s*$/g, '').replace(/'/g, '"'));
+
+				if (!refresh_timer)
+					refresh_timer = requestAnimationFrame(refresh);
+			}
+		}
+	]]></script>
+	<Element id="max" width="20" height="1" background="red"/>
+</Element>
