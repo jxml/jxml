@@ -5,6 +5,8 @@
 
 			A renderer must be specified as a child of the List component. The renderer component
 			will have its `data` attribute set to the value.
+
+			Items are ordered by insertion order: sorting is a future enhancement.
 		]]>
 		<Example>
 			<List data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">

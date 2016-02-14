@@ -5,6 +5,9 @@
 
 			A renderer must be specified as a child of the List component. The renderer component
 			will have its `data` attribute set to the value.
+
+			Items are sorted lexicographically by its key in the `data` attribute. A future
+			enhancement will add sorting by other attributes.
 		]]>
 		<Example>
 			<VList data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">
