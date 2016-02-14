@@ -84,12 +84,16 @@ JXMLComponent.prototype.create = function(module, attr, child_key) {
 }
 
 JXMLComponent.prototype.destroy = function() {
-	var children = this.children, k;
+	if (this.root)
+		this.root.destroy();
+	else {
+		var children = this.children, k;
 
-	for (k in children)
-		children[k].destroy();
+		for (k in children)
+			children[k].destroy();
 
-	this.onDirty(null);
+		this.onDirty(null);
+	}
 }
 
 /**
