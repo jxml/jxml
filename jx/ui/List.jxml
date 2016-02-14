@@ -8,7 +8,7 @@
 		]]>
 		<Example>
 			<List data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">
-				<Label text="cow" />
+				<Label text="…" />
 			</List>
 		</Example>
 	</Doc>
@@ -25,16 +25,21 @@
 					children = {}, defrag;
 
 				for (var k in delta.data) {
-					var child = delta.data[k];
+					var child_data = delta.data[k];
 
-					if (!child) {
+					if (!child_data) {
 						children[k] = null;
 						defrag = true;
 						continue;
 					}
 
+					var child = {};
+
 					for (var a in template)
 						child[a] = template[a];
+
+					for (a in child_data)
+						child[a] = child_data[a];
 
 					child.visible = true;
 					child.x = 0;
