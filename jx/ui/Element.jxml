@@ -63,6 +63,9 @@
 			if ('onclick' in delta)
 				dirty.onclick = delta.onclick;
 
+			if ('onscroll' in delta)
+				dirty.onscroll = delta.onscroll;
+
 			return dirty;
 		}
 
