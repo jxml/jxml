@@ -15,6 +15,8 @@
 		</Example>
 	</Doc>
 	<script><![CDATA[
+		var DEFAULT_HEIGHT = 20;
+
 		var self = this, max = 0;
 
 		function onAttr(attr, delta) {
@@ -46,7 +48,7 @@
 					child.visible = true;
 					child.x = 0;
 					child.y = max;
-					max += attr.rowheight || 10;
+					max += attr.rowheight || DEFAULT_HEIGHT;
 					child.width = attr.width;
 					child.height = attr.rowheight;
 					children[k] = child;
@@ -60,7 +62,7 @@
 					for (var k in attr.data) {
 						delta.children[k] = delta.children[k] || {};
 						delta.children[k].y = max;
-						max += attr.rowheight || 10;
+						max += attr.rowheight || DEFAULT_HEIGHT;
 					}
 				}
 			}
