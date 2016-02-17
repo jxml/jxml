@@ -144,9 +144,19 @@ HTMLRenderer.prototype.updateElement = function(uid, delta, attr) {
 	if ('cursor' in delta)
 		style.cursor = delta.cursor;
 
+	if ('overflow' in delta) {
+		style.overflow = delta.overflow;
+		style.willChange = delta.overflow == 'scroll'? 'transform' : '';
+	}
+
 	if ('onclick' in delta)
 		el.onclick = function() {
 			JXML.cast(delta.onclick[0], delta.onclick[1], delta.onclick[2]);
+		};
+
+	if ('onscroll' in delta)
+		el.onscroll = function(e) {
+			JXML.cast(delta.onscroll[0], delta.onscroll[1], [e.srcElement.scrollTop]);
 		};
 
 	// TODO appendChild called more often than needed

@@ -1,0 +1,71 @@
+<Element xmlns="jx/ui" overflow="scroll">
+	<Doc>
+		<![CDATA[
+			List component that creates children by spawning one component per key in attr.data.
+
+			A renderer must be specified as a child of the List component. The renderer component
+			will have its `data` attribute set to the value.
+
+			Items are ordered by insertion order: sorting is a future enhancement.
+		]]>
+		<Example>
+			<List data="{{ { 'moo': { 'text': 'moo' }, 'cow': { 'text': 'cow' } } }}">
+				<Label text="…" />
+			</List>
+		</Example>
+	</Doc>
+	<script><![CDATA[
+		var DEFAULT_HEIGHT = 20;
+
+		var self = this, max = 0;
+
+		function onAttr(attr, delta) {
+			if ('data' in delta) {
+				// TODO: hack to allow JSON data in examples
+				if (typeof delta.data == 'string' && /^\s*\{\{.*\}\}\s*$/.test(delta.data))
+					delta.data = JSON.parse(delta.data.replace(/^\s*\{\{|\}\}\s*$/g, '').replace(/'/g, '"'));
+
+				var template = attr.children[Object.keys(attr.children)[0]],
+					children = {}, defrag;
+
+				for (var k in delta.data) {
+					var child_data = delta.data[k];
+
+					if (!child_data) {
+						children[k] = null;
+						defrag = true;
+						continue;
+					}
+
+					var child = {};
+
+					for (var a in template)
+						child[a] = template[a];
+
+					for (a in child_data)
+						child[a] = child_data[a];
+
+					child.visible = true;
+					child.x = 0;
+					child.y = max;
+					max += attr.rowheight || DEFAULT_HEIGHT;
+					child.width = attr.width;
+					child.height = attr.rowheight;
+					children[k] = child;
+				}
+
+				delta.children = children;
+
+				if (defrag) {
+					max = 0;
+
+					for (var k in attr.data) {
+						delta.children[k] = delta.children[k] || {};
+						delta.children[k].y = max;
+						max += attr.rowheight || DEFAULT_HEIGHT;
+					}
+				}
+			}
+		}
+	]]></script>
+</Element>

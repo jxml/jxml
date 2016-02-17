@@ -232,7 +232,7 @@ JXMLCompiler.prototype.generateJS = function(build_assets) {
 			template:    build_assets.template,
 			init:        new Function(build_assets.script),
 			IDs:         build_assets.IDs,
-			docs:        JSON.stringify(build_assets.meta.docs),
+			docs:        build_assets.meta.docs,
 			handle_cast: function(m, a) { this.locals[m] && this.locals[m].apply(this, a) }
 		}
 	);

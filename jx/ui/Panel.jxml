@@ -3,6 +3,11 @@
 		<![CDATA[
 			I am a Panel. I am made of a Box with a FillText for my title.
 		]]>
+		<Example>
+			<Panel title="A Panel">
+				<Label text="Here is some text"/>
+			</Panel>
+		</Example>
 	</Doc>
 	<Box height="50" background="#555" padding="10">
 		<FillText id="title" textAlign="center" textColor="white" fontFamily="DIN Next LT Pro" fontWeight="lighter">

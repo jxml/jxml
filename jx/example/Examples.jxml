@@ -1,0 +1,55 @@
+<Box xmlns="jx/ui">
+	<script>
+		<![CDATA[
+			var clear = {};
+
+			function onAttr(attr, delta) {
+				if ('component' in delta) {
+					var module = delta.component + '.jxml!jxml', k;
+
+					description.setAttr({ text: '' });
+					examples.setAttr({ children: clear });
+					clear = {};
+
+					System.import(module).then(function(m) {
+						var docs = m.default.prototype.docs[0], empty = true;
+
+						for (var k in docs.children) {
+							docs.children[k].module = 'jx/ui/Box'; // TODO: don't mangle
+							clear[k] = null;
+							empty = false;
+						}
+
+						// TODO: brace attributes are not expanded
+
+						description.setAttr({ text: docs.text });
+
+						if (!empty)
+							examples.setAttr({ children: docs.children });
+						else if ( ! find(m.default.prototype.template) ) {
+							// If there are no examples, load component by itself
+							// unless component includes this Examples component
+							examples.setAttr({ children: { single: { module: delta.component, visible: true } } });
+							clear.single = null;
+						}
+					});
+				}
+			}
+
+			function find(node) {
+				if (!node) return;
+
+				if (node.module == 'jx/example/Examples')
+					return true;
+
+				for (var k in node.children)
+					if (find(node.children[k]))
+						return true;
+			}
+		]]>
+	</script>
+	<Box padding="40" gap="20">
+		<Label id="description"/>
+		<Box id="examples"/>
+	</Box>
+</Box>
