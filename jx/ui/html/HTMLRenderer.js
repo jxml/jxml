@@ -2,7 +2,7 @@ import JXML from 'jx/JXML';
 
 export default function HTMLRenderer(app, dom) {
 	if (typeof app == 'string')
-		app = JXML.create(this, app);
+		app = JXML.create(this, app, dom && dom.id);
 
 	this.app = app;
 	dom = dom || document.body;
