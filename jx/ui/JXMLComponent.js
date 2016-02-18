@@ -122,7 +122,7 @@ JXMLComponent.prototype.setAttr = function(delta) {
 		var delta_children = {};
 
 		for (var k in delta.children)
-			delta_children['Z' + k] = delta.children[k];
+			delta_children['~' + k] = delta.children[k];
 
 		delta.children = delta_children;
 	}
@@ -250,7 +250,7 @@ function copy(obj) {
  * > toKey(42)
  * "0G"
  */
-var KEYS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), KEYS_LENGTH = KEYS.length;
+var KEYS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(''), KEYS_LENGTH = KEYS.length;
 
 function toKey(n) {
 	return KEYS[n / KEYS_LENGTH | 0] + KEYS[n % KEYS_LENGTH];
