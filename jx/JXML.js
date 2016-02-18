@@ -11,7 +11,12 @@ var components = {}, // God object
  */
 JXML.create = function(renderer, module, uid, attr) {
 	// TODO: allow module overwrites by different renderers
-	uid = uid || 'root';
+	if (!uid) {
+		uid = 'root';
+
+		for (var i = 2; uid in components; i++)
+			uid = 'root_' + i;
+	}
 
 	var element = new JXMLComponent(renderer, module, uid, attr);
 
