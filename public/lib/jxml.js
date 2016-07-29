@@ -9,11 +9,11 @@ export function locate(load) {
 	return load.name;
 }
 
-export function fetch(load) {
+export function fetch(load, default_fetch) {
 	if (load.metadata.source)
 		return load.metadata.source;
 
-	return System.fetch(load);
+	return default_fetch(load);
 }
 
 export function translate(load) {
